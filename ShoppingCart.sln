@@ -5,7 +5,9 @@ VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShoppingCartAPI", "ShoppingCartAPI\ShoppingCartAPI.csproj", "{932620FB-F527-4C34-AE76-930AF1C23E77}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAL", "DAL\DAL.csproj", "{248CA4AD-999E-431E-9BCD-10142793C32B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAL", "DAL\DAL.csproj", "{248CA4AD-999E-431E-9BCD-10142793C32B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorUI", "BlazorUI\BlazorUI.csproj", "{DAD92AB7-4158-4F2D-8CA0-795B39F180B5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{248CA4AD-999E-431E-9BCD-10142793C32B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{248CA4AD-999E-431E-9BCD-10142793C32B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{248CA4AD-999E-431E-9BCD-10142793C32B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAD92AB7-4158-4F2D-8CA0-795B39F180B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAD92AB7-4158-4F2D-8CA0-795B39F180B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAD92AB7-4158-4F2D-8CA0-795B39F180B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAD92AB7-4158-4F2D-8CA0-795B39F180B5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
