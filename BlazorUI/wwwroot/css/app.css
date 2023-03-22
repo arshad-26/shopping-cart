@@ -1,3 +1,24 @@
+*, *::after, *::before{
+    box-sizing:border-box;
+}
+
+html {
+    --background-color: #f1e0c0;
+    --btn-color: #797642;
+    --btn-hover-color: #9d9a63;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--background-color);
+    font-family: 'Montserrat', sans-serif;
+}
+
+h1, h2, h3, p{
+    margin: 0;
+}
+
 h1:focus {
     outline: none;
 }

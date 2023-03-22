@@ -1,0 +1,67 @@
+﻿.container {
+    border: 1px solid black;
+    padding: 1em;
+    width: 35%;
+    margin: auto;
+    border-radius: 7px;
+}
+
+.register-heading {
+    text-align: center;
+}
+
+.password-info {
+    color: red;
+    margin-top: 1em;
+}
+
+form {
+    margin-top: 2em;
+}
+
+.input-section:not(:first-child) {
+    margin-top: 1em;
+}
+
+label:not(.role-label) {
+    display: block;
+}
+
+    label:not(.role-label)::after {
+        content: '*';
+        color: red;
+    }
+
+.radio-section {
+    margin-top: 0.3em;
+    display: flex;
+    width: 30%;
+    justify-content: space-between;
+}
+
+input[type="text"], input[type="password"] {
+    width: 100%;
+    padding: 0.5em;
+    margin-top: 0.3em;
+}
+
+input[type="radio"] {
+    margin: 0;
+}
+
+.submit-btn {
+    background-color: var(--btn-color);
+    border: none;
+    color: white;
+    padding: 0.5em;
+    text-align: center;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    display: block;
+    margin: auto;
+}
+
+    .submit-btn:hover {
+        background-color: var(--btn-hover-color);
+    }
