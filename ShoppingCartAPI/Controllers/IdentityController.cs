@@ -8,6 +8,7 @@ using DAL.Entities;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using DTO.Identity;
 
 namespace ShoppingCartAPI.Controllers;
 

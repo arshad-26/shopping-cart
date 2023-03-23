@@ -1,28 +1,28 @@
-using ShoppingCartAPI.Validation;
+using DTO.Validation;
 using System.ComponentModel.DataAnnotations;
 
-namespace ShoppingCartAPI.Models;
+namespace DTO.Identity;
 
 public class RegisterModel
 {
-    [Required]
+    [Required(ErrorMessage = "This field is required")]
     public string FirstName { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "This field is required")]
     public string LastName { get; set; }
 
-    [Required]
-    [EmailAddress]
+    [Required(ErrorMessage = "This field is required")]
+    [EmailAddress(ErrorMessage = "Please enter a valid email address")]
     public string Email { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "This field is required")]
     public string Password { get; set; }
 
-    [Required]
-    [Compare("Password")]
+    [Required(ErrorMessage = "This field is required")]
+    [Compare("Password", ErrorMessage = "Password and ConfirmPassword do not match")]
     public string ConfirmPassword { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "This field is required")]
     [ValidValues("User", "Admin")]
     public string Role { get; set; }
 

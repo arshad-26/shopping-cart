@@ -1,46 +1,56 @@
-﻿<article class="container">
+﻿@using DTO.Identity
+
+<article class="container">
     <h2 class="register-heading">Register</h2>
     <p class="password-info">Password should have a minimum of 8 characters and must contain atleast one uppercase, one lowercase and a digit</p>
-    <form>
-        <section class="input-section">
-            <label for="FirstName">First Name</label>
-            <input type="text" name="FirstName" id="FirstName" />
-        </section>
-        <section class="input-section">
-            <label for="LastName">Last Name</label>
-            <input type="text" name="LastName" id="LastName" />
-        </section>
-        <section class="input-section">
-            <label for="Email">Email</label>
-            <input type="text" name="Email" id="Email" />
-        </section>
-        <section class="input-section">
-            <label for="Password">Password</label>
-            <input type="password" name="Password" id="Password" />
-        </section>
-        <section class="input-section">
-            <label for="ConfirmPassword">Confirm Password</label>
-            <input type="password" name="ConfirmPassword" id="ConfirmPassword" />
-        </section>
-        <section class="input-section">
-            <p>Role</p>
-            <div class="radio-section">
-                <div class="user-value">
-                    <input type="radio" name="Role" id="User" value="User" checked />
-                    <label for="User" class="role-label">User</label>
+    <section class="form-section">
+        <EditForm Model="@registerModel">
+            <DataAnnotationsValidator />
+            <section class="input-section">
+                <label for="FirstName">First Name</label>
+                <InputText @bind-Value="@registerModel.FirstName" name="FirstName" id="FirstName" class="text-input" />
+                <ValidationMessage For="@(() => registerModel.FirstName)" />
+            </section>
+            <section class="input-section">
+                <label for="LastName">Last Name</label>
+                <InputText @bind-Value="@registerModel.LastName" name="LastName" id="LastName" class="text-input" />
+                <ValidationMessage For="@(() => registerModel.LastName)" />
+            </section>
+            <section class="input-section">
+                <label for="Email">Email</label>
+                <InputText @bind-Value="@registerModel.Email" name="Email" id="Email" class="text-input" />
+                <ValidationMessage For="@(() => registerModel.Email)" />
+            </section>
+            <section class="input-section">
+                <label for="Password">Password</label>
+                <InputText @bind-Value="@registerModel.Password" type="password" name="Password" id="Password" class="text-input" />
+                <ValidationMessage For="@(() => registerModel.Password)" />
+            </section>
+            <section class="input-section">
+                <label for="ConfirmPassword">Confirm Password</label>
+                <InputText @bind-Value="@registerModel.ConfirmPassword" type="password" name="ConfirmPassword" id="ConfirmPassword" class="text-input" />
+                <ValidationMessage For="@(() => registerModel.ConfirmPassword)" />
+            </section>
+            <section class="input-section">
+                <p>Role</p>
+                <div class="radio-section">
+                    <div class="user-value">
+                        <input type="radio" name="Role" id="User" value="User" checked />
+                        <label for="User" class="role-label">User</label>
+                    </div>
+                    <div class="admin-value">
+                        <input type="radio" name="Role" id="Admin" value="Admin" />
+                        <label for="Admin" class="role-label">Admin</label>
+                    </div>
                 </div>
-                <div class="admin-value">
-                    <input type="radio" name="Role" id="Admin" value="Admin" />
-                    <label for="Admin" class="role-label">Admin</label>
-                </div>
-            </div>
-        </section>
-        <section class="input-section">
-            <input type="submit" value="Submit" class="submit-btn" />
-        </section>
-    </form>
+            </section>
+            <section class="input-section">
+                <input type="submit" value="Submit" class="submit-btn" />
+            </section>
+        </EditForm>
+    </section>
 </article>
 
 @code {
-
+    private RegisterModel registerModel = new RegisterModel();
 }

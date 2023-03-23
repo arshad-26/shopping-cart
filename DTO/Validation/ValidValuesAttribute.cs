@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace ShoppingCartAPI.Validation;
+namespace DTO.Validation;
 
 public class ValidValuesAttribute : ValidationAttribute
 {

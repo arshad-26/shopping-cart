@@ -11,11 +11,11 @@
 }
 
 .password-info {
-    color: red;
+    color: brown;
     margin-top: 1em;
 }
 
-form {
+.form-section {
     margin-top: 2em;
 }
 
@@ -39,10 +39,14 @@ label:not(.role-label) {
     justify-content: space-between;
 }
 
-input[type="text"], input[type="password"] {
+::deep .text-input {
     width: 100%;
     padding: 0.5em;
     margin-top: 0.3em;
+}
+
+::deep .validation-message{
+    color:red;
 }
 
 input[type="radio"] {
