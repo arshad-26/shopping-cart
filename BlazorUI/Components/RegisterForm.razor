@@ -3,54 +3,62 @@
 <article class="container">
     <h2 class="register-heading">Register</h2>
     <p class="password-info">Password should have a minimum of 8 characters and must contain atleast one uppercase, one lowercase and a digit</p>
-    <section class="form-section">
-        <EditForm Model="@registerModel" OnValidSubmit="@HandleValidSubmit">
-            <DataAnnotationsValidator />
-            <section class="input-section">
-                <label for="FirstName">First Name</label>
-                <InputText @bind-Value="@registerModel.FirstName" id="FirstName" class="text-input" />
+    <EditForm Model="@registerModel" OnValidSubmit="@HandleValidSubmit" class="form-section">
+        <DataAnnotationsValidator />
+        <section class="input-section">
+            <label for="FirstName">First Name</label>
+            <InputText @bind-Value="@registerModel.FirstName" id="FirstName" class="text-input" />
+            <div class="validation-container">
                 <ValidationMessage For="@(() => registerModel.FirstName)" />
-            </section>
-            <section class="input-section">
-                <label for="LastName">Last Name</label>
-                <InputText @bind-Value="@registerModel.LastName" id="LastName" class="text-input" />
+            </div>
+        </section>
+        <section class="input-section">
+            <label for="LastName">Last Name</label>
+            <InputText @bind-Value="@registerModel.LastName" id="LastName" class="text-input" />
+            <div class="validation-container">
                 <ValidationMessage For="@(() => registerModel.LastName)" />
-            </section>
-            <section class="input-section">
-                <label for="Email">Email</label>
-                <InputText @bind-Value="@registerModel.Email" id="Email" class="text-input" />
+            </div>
+        </section>
+        <section class="input-section">
+            <label for="Email">Email</label>
+            <InputText @bind-Value="@registerModel.Email" id="Email" class="text-input" />
+            <div class="validation-container">
                 <ValidationMessage For="@(() => registerModel.Email)" />
-            </section>
-            <section class="input-section">
-                <label for="Password">Password</label>
-                <InputText @bind-Value="@registerModel.Password" type="password" id="Password" class="text-input" />
+            </div>
+        </section>
+        <section class="input-section">
+            <label for="Password">Password</label>
+            <InputText @bind-Value="@registerModel.Password" type="password" id="Password" class="text-input" />
+            <div class="validation-container">
                 <ValidationMessage For="@(() => registerModel.Password)" />
-            </section>
-            <section class="input-section">
-                <label for="ConfirmPassword">Confirm Password</label>
-                <InputText @bind-Value="@registerModel.ConfirmPassword" type="password" id="ConfirmPassword" class="text-input" />
+            </div>
+        </section>
+        <section class="input-section">
+            <label for="ConfirmPassword">Confirm Password</label>
+            <InputText @bind-Value="@registerModel.ConfirmPassword" type="password" id="ConfirmPassword" class="text-input" />
+            <div class="validation-container">
                 <ValidationMessage For="@(() => registerModel.ConfirmPassword)" />
-            </section>
-            <section class="input-section">
-                <p>Role</p>
-                <InputRadioGroup id="Role" @bind-Value="@registerModel.Role">
-                    <div class="radio-section">
-                        <div class="user-value">
-                            <InputRadio Value="@("User")" id="User" />
-                            <label for="User" class="role-label">User</label>
-                        </div>
-                        <div class="admin-value">
-                            <InputRadio Value="@("Admin")" id="Admin" />
-                            <label for="Admin" class="role-label">Admin</label>
-                        </div>
+            </div>
+        </section>
+        <section class="input-section">
+            <p>Role</p>
+            <InputRadioGroup id="Role" @bind-Value="@registerModel.Role">
+                <div class="radio-section">
+                    <div class="user-value">
+                        <InputRadio Value="@("User")" id="User" />
+                        <label for="User" class="role-label">User</label>
                     </div>
-                </InputRadioGroup>
-            </section>
-            <section class="input-section">
-                <input type="submit" value="Submit" class="submit-btn" />
-            </section>
-        </EditForm>
-    </section>
+                    <div class="admin-value">
+                        <InputRadio Value="@("Admin")" id="Admin" />
+                        <label for="Admin" class="role-label">Admin</label>
+                    </div>
+                </div>
+            </InputRadioGroup>
+        </section>
+        <section class="input-section">
+            <input type="submit" value="Submit" class="submit-btn" />
+        </section>
+    </EditForm>
 </article>
 
 @code {

@@ -15,7 +15,7 @@
     margin-top: 1em;
 }
 
-.form-section {
+::deep .form-section {
     margin-top: 2em;
 }
 
@@ -47,6 +47,10 @@ label:not(.role-label) {
 
 ::deep .validation-message{
     color:red;
+}
+
+::deep .validation-message:not(:first-child){
+    display: none;
 }
 
 ::deep input[type="radio"] {
