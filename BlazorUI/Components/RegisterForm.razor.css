@@ -49,7 +49,7 @@ label:not(.role-label) {
     color:red;
 }
 
-input[type="radio"] {
+::deep input[type="radio"] {
     margin: 0;
 }
 

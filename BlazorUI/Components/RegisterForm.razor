@@ -1,48 +1,50 @@
-﻿@using DTO.Identity
+﻿@inject HttpClient httpClient
 
 <article class="container">
     <h2 class="register-heading">Register</h2>
     <p class="password-info">Password should have a minimum of 8 characters and must contain atleast one uppercase, one lowercase and a digit</p>
     <section class="form-section">
-        <EditForm Model="@registerModel">
+        <EditForm Model="@registerModel" OnValidSubmit="@HandleValidSubmit">
             <DataAnnotationsValidator />
             <section class="input-section">
                 <label for="FirstName">First Name</label>
-                <InputText @bind-Value="@registerModel.FirstName" name="FirstName" id="FirstName" class="text-input" />
+                <InputText @bind-Value="@registerModel.FirstName" id="FirstName" class="text-input" />
                 <ValidationMessage For="@(() => registerModel.FirstName)" />
             </section>
             <section class="input-section">
                 <label for="LastName">Last Name</label>
-                <InputText @bind-Value="@registerModel.LastName" name="LastName" id="LastName" class="text-input" />
+                <InputText @bind-Value="@registerModel.LastName" id="LastName" class="text-input" />
                 <ValidationMessage For="@(() => registerModel.LastName)" />
             </section>
             <section class="input-section">
                 <label for="Email">Email</label>
-                <InputText @bind-Value="@registerModel.Email" name="Email" id="Email" class="text-input" />
+                <InputText @bind-Value="@registerModel.Email" id="Email" class="text-input" />
                 <ValidationMessage For="@(() => registerModel.Email)" />
             </section>
             <section class="input-section">
                 <label for="Password">Password</label>
-                <InputText @bind-Value="@registerModel.Password" type="password" name="Password" id="Password" class="text-input" />
+                <InputText @bind-Value="@registerModel.Password" type="password" id="Password" class="text-input" />
                 <ValidationMessage For="@(() => registerModel.Password)" />
             </section>
             <section class="input-section">
                 <label for="ConfirmPassword">Confirm Password</label>
-                <InputText @bind-Value="@registerModel.ConfirmPassword" type="password" name="ConfirmPassword" id="ConfirmPassword" class="text-input" />
+                <InputText @bind-Value="@registerModel.ConfirmPassword" type="password" id="ConfirmPassword" class="text-input" />
                 <ValidationMessage For="@(() => registerModel.ConfirmPassword)" />
             </section>
             <section class="input-section">
                 <p>Role</p>
-                <div class="radio-section">
-                    <div class="user-value">
-                        <input type="radio" name="Role" id="User" value="User" checked />
-                        <label for="User" class="role-label">User</label>
+                <InputRadioGroup id="Role" @bind-Value="@registerModel.Role">
+                    <div class="radio-section">
+                        <div class="user-value">
+                            <InputRadio Value="@("User")" id="User" />
+                            <label for="User" class="role-label">User</label>
+                        </div>
+                        <div class="admin-value">
+                            <InputRadio Value="@("Admin")" id="Admin" />
+                            <label for="Admin" class="role-label">Admin</label>
+                        </div>
                     </div>
-                    <div class="admin-value">
-                        <input type="radio" name="Role" id="Admin" value="Admin" />
-                        <label for="Admin" class="role-label">Admin</label>
-                    </div>
-                </div>
+                </InputRadioGroup>
             </section>
             <section class="input-section">
                 <input type="submit" value="Submit" class="submit-btn" />
@@ -52,5 +54,10 @@
 </article>
 
 @code {
-    private RegisterModel registerModel = new RegisterModel();
+    private RegisterModel registerModel = new RegisterModel() { Role = "User" };
+
+    private async Task HandleValidSubmit()
+    {
+        HttpResponseMessage response = await httpClient.PostAsJsonAsync("Identity/Register", registerModel);
+    }
 }

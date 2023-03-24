@@ -16,9 +16,11 @@ public class RegisterModel
     public string Email { get; set; }
 
     [Required(ErrorMessage = "This field is required")]
+    [RegularExpression("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d\\w\\W]{8,}$", ErrorMessage = "Please enter a valid password")]
     public string Password { get; set; }
 
     [Required(ErrorMessage = "This field is required")]
+    [RegularExpression("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d\\w\\W]{8,}$", ErrorMessage = "Please enter a valid password")]
     [Compare("Password", ErrorMessage = "Password and ConfirmPassword do not match")]
     public string ConfirmPassword { get; set; }
 
