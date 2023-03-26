@@ -3,7 +3,7 @@
 <article class="container">
     <h2 class="register-heading">Register</h2>
     <p class="password-info">Password should have a minimum of 8 characters and must contain atleast one uppercase, one lowercase and a digit</p>
-    <EditForm Model="@registerModel" OnValidSubmit="@HandleValidSubmit" class="form-section">
+    <EditForm EditContext="@editContext" OnValidSubmit="@HandleValidSubmit" class="form-section">
         <DataAnnotationsValidator />
         <section class="input-section">
             <label for="FirstName">First Name</label>
@@ -21,7 +21,7 @@
         </section>
         <section class="input-section">
             <label for="Email">Email</label>
-            <InputText @bind-Value="@registerModel.Email" id="Email" class="text-input" />
+            <InputText @bind-Value="@registerModel.Email" @bind-Value:after="@EmailExists" id="Email" class="text-input" />
             <div class="validation-container">
                 <ValidationMessage For="@(() => registerModel.Email)" />
             </div>
@@ -62,10 +62,47 @@
 </article>
 
 @code {
-    private RegisterModel registerModel = new RegisterModel() { Role = "User" };
+    private RegisterModel registerModel = new () { Role = "User" };
+    private EditContext editContext;
+    private ValidationMessageStore modelState;
+
+    protected override void OnInitialized()
+    {
+        editContext = new(registerModel);
+        modelState = new ValidationMessageStore(editContext);
+    }
+
+    private async Task<bool> EmailExists()
+    {
+        bool emailExists = false;
+
+        if (!String.IsNullOrWhiteSpace(registerModel.Email))
+        {
+            FieldIdentifier emailControlIdentifier = editContext.Field(nameof(registerModel.Email));
+
+            emailExists = await httpClient.GetFromJsonAsync<bool>($"Identity/EmailExists?email={registerModel.Email}");
+
+            if (emailExists)
+            {
+                modelState.Add(emailControlIdentifier, "Email already exists");
+                editContext.NotifyValidationStateChanged();
+            }
+            else
+            {
+                modelState.Clear(emailControlIdentifier);
+            }
+        }
+
+        return emailExists;
+    }
 
     private async Task HandleValidSubmit()
     {
-        HttpResponseMessage response = await httpClient.PostAsJsonAsync("Identity/Register", registerModel);
+        bool emailExists = await EmailExists();
+
+        if (!emailExists)
+        {
+            HttpResponseMessage response = await httpClient.PostAsJsonAsync("Identity/Register", registerModel);
+        }
     }
 }
