@@ -76,20 +76,17 @@
     {
         bool emailExists = false;
 
+        FieldIdentifier emailControlIdentifier = editContext.Field(nameof(registerModel.Email));
+        modelState.Clear(emailControlIdentifier);
+
         if (!String.IsNullOrWhiteSpace(registerModel.Email))
         {
-            FieldIdentifier emailControlIdentifier = editContext.Field(nameof(registerModel.Email));
-
             emailExists = await httpClient.GetFromJsonAsync<bool>($"Identity/EmailExists?email={registerModel.Email}");
 
             if (emailExists)
             {
                 modelState.Add(emailControlIdentifier, "Email already exists");
                 editContext.NotifyValidationStateChanged();
-            }
-            else
-            {
-                modelState.Clear(emailControlIdentifier);
             }
         }
 
