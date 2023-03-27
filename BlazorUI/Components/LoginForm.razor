@@ -1,0 +1,27 @@
+﻿<article class="container">
+    <h2 class="login-heading">Login</h2>
+    <EditForm Model="@loginModel" class="form-section">
+        <DataAnnotationsValidator />
+        <section class="input-section">
+            <label for="Email">Email</label>
+            <InputText @bind-Value="@loginModel.Email" id="Email" class="text-input" />
+            <div class="validation-container">
+                <ValidationMessage For="@(() => loginModel.Email)" />
+            </div>
+        </section>
+        <section class="input-section">
+            <label for="Password">Password</label>
+            <InputText @bind-Value="@loginModel.Password" type="password" id="Password" class="text-input" />
+            <div class="validation-container">
+                <ValidationMessage For="@(() => loginModel.Password)" />
+            </div>
+        </section>
+        <section class="input-section">
+            <input type="submit" value="Login" class="submit-btn" />
+        </section>
+    </EditForm>
+</article>
+
+@code {
+    private LoginModel loginModel = new();
+}

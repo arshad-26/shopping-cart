@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAL", "DAL\DAL.csproj", "{2
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorUI", "BlazorUI\BlazorUI.csproj", "{DAD92AB7-4158-4F2D-8CA0-795B39F180B5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DTO", "DTO\DTO.csproj", "{A9DA2B4A-8309-4246-A13E-1FC138B27708}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DTO", "DTO\DTO.csproj", "{A9DA2B4A-8309-4246-A13E-1FC138B27708}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

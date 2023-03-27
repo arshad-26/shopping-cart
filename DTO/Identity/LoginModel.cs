@@ -1,13 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace ShoppingCartAPI.Models;
+namespace DTO.Identity;
 
 public class LoginModel
 {
-    [Required]
+    [Required(ErrorMessage = "This field is required")]
     public string Email { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "This field is required")]
     public string Password { get; set; }
 
     public LoginModel()
