@@ -73,3 +73,9 @@ label:not(.role-label) {
     .submit-btn:hover {
         background-color: var(--btn-hover-color);
     }
+
+.login-btn{
+    display: block;
+    margin-top: 1em;
+    text-align: center;
+}
