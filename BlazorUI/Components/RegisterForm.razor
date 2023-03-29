@@ -3,7 +3,14 @@
 <article class="container">
     @if (!String.IsNullOrWhiteSpace(promptMessage))
     {
-        <p class="prompt-message @(isSuccess ? "success" : "error")">@promptMessage</p>
+        if (isSuccess)
+        {
+            <SuccessAlert Value="@promptMessage" />
+        }
+        else
+        {
+            <ErrorAlert Value="@promptMessage" />
+        }
     }
     <h2 class="register-heading">Register</h2>
     <p class="password-info">Password should have a minimum of 8 characters and must contain atleast one uppercase, one lowercase and a digit</p>

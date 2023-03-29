@@ -3,7 +3,14 @@
 <article class="container">
     @if (!String.IsNullOrWhiteSpace(promptMessage))
     {
-        <p class="prompt-message @(isSuccess ? "success" : "error")">@promptMessage</p>
+        if (isSuccess)
+        {
+            <SuccessAlert Value="@promptMessage" />
+        }
+        else
+        {
+            <ErrorAlert Value="@promptMessage" />
+        }
     }
     <h2 class="login-heading">Login</h2>
     <EditForm Model="@loginModel" class="form-section" OnValidSubmit="@HandleSubmit">
