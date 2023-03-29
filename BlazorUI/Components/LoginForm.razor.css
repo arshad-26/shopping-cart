@@ -6,6 +6,20 @@
     border-radius: 7px;
 }
 
+.prompt-message {
+    margin-bottom: 1em;
+    text-align: center;
+    font-size: 1.2rem;
+}
+
+.success {
+    color: var(--success-color);
+}
+
+.error {
+    color: var(--error-clr);
+}
+
 .login-heading {
     text-align: center;
 }

@@ -6,6 +6,8 @@ html {
     --background-color: #f1e0c0;
     --btn-color: #797642;
     --btn-hover-color: #9d9a63;
+    --success-color: green;
+    --error-clr:red;
 }
 
 body {

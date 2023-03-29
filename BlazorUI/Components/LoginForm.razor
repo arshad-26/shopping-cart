@@ -1,6 +1,12 @@
-﻿<article class="container">
+﻿@inject HttpClient httpClient
+
+<article class="container">
+    @if (!String.IsNullOrWhiteSpace(promptMessage))
+    {
+        <p class="prompt-message @(isSuccess ? "success" : "error")">@promptMessage</p>
+    }
     <h2 class="login-heading">Login</h2>
-    <EditForm Model="@loginModel" class="form-section">
+    <EditForm Model="@loginModel" class="form-section" OnValidSubmit="@HandleSubmit">
         <DataAnnotationsValidator />
         <section class="input-section">
             <label for="Email">Email</label>
@@ -20,9 +26,30 @@
             <input type="submit" value="Login" class="submit-btn" />
         </section>
     </EditForm>
-    <a href="/" class="register-btn">Create a new user</a>
+    <a href="/register" class="register-btn">Create a new user</a>
 </article>
 
 @code {
     private LoginModel loginModel = new();
+    private string promptMessage = String.Empty;
+    private bool isSuccess;
+
+    private async Task HandleSubmit()
+    {
+        HttpResponseMessage response = await httpClient.PostAsJsonAsync("Identity/Login", loginModel);
+
+        if (response.IsSuccessStatusCode)
+        {
+
+        }
+        else
+        {
+            if(response.StatusCode == HttpStatusCode.Unauthorized)
+                promptMessage = "Email or Password is incorrect";
+            else
+                promptMessage = "An error occured. Please try again";
+
+            isSuccess = false;
+        }
+    }
 }

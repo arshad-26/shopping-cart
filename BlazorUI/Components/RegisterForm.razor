@@ -1,6 +1,10 @@
 ﻿@inject HttpClient httpClient
 
 <article class="container">
+    @if (!String.IsNullOrWhiteSpace(promptMessage))
+    {
+        <p class="prompt-message @(isSuccess ? "success" : "error")">@promptMessage</p>
+    }
     <h2 class="register-heading">Register</h2>
     <p class="password-info">Password should have a minimum of 8 characters and must contain atleast one uppercase, one lowercase and a digit</p>
     <EditForm EditContext="@editContext" OnValidSubmit="@HandleValidSubmit" class="form-section">
@@ -59,13 +63,15 @@
             <input type="submit" value="Register" class="submit-btn" />
         </section>
     </EditForm>
-    <a href="/login" class="login-btn">Already a user?Login</a>
+    <a href="/" class="login-btn">Already a user?Login</a>
 </article>
 
 @code {
     private RegisterModel registerModel = new () { Role = "User" };
     private EditContext editContext;
     private ValidationMessageStore modelState;
+    private string promptMessage = String.Empty;
+    private bool isSuccess;
 
     protected override void OnInitialized()
     {
@@ -101,6 +107,17 @@
         if (!emailExists)
         {
             HttpResponseMessage response = await httpClient.PostAsJsonAsync("Identity/Register", registerModel);
+
+            if (response.IsSuccessStatusCode)
+            {
+                promptMessage = "User has been created successfully";
+                isSuccess = true;
+            }
+            else
+            {
+                promptMessage = "An error occured while creating the user";
+                isSuccess = false;
+            }
         }
     }
 }
