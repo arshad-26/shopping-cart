@@ -1,17 +1,8 @@
-﻿@inject HttpClient httpClient
+﻿@implements IDisposable
+
+@inject HttpClient httpClient
 
 <article class="container">
-    @if (!String.IsNullOrWhiteSpace(promptMessage))
-    {
-        if (isSuccess)
-        {
-            <SuccessAlert Value="@promptMessage" />
-        }
-        else
-        {
-            <ErrorAlert Value="@promptMessage" />
-        }
-    }
     <h2 class="login-heading">Login</h2>
     <EditForm Model="@loginModel" class="form-section" OnValidSubmit="@HandleSubmit">
         <DataAnnotationsValidator />
@@ -38,8 +29,6 @@
 
 @code {
     private LoginModel loginModel = new();
-    private string promptMessage = String.Empty;
-    private bool isSuccess;
 
     private async Task HandleSubmit()
     {
@@ -51,12 +40,12 @@
         }
         else
         {
-            if(response.StatusCode == HttpStatusCode.Unauthorized)
-                promptMessage = "Email or Password is incorrect";
-            else
-                promptMessage = "An error occured. Please try again";
-
-            isSuccess = false;
+            
         }
+    }
+
+    public void Dispose()
+    {
+        
     }
 }

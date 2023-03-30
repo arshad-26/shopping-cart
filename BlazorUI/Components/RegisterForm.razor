@@ -1,17 +1,9 @@
-﻿@inject HttpClient httpClient
+﻿@implements IDisposable
+
+@inject HttpClient httpClient
+@inject NavigationManager navigationManager
 
 <article class="container">
-    @if (!String.IsNullOrWhiteSpace(promptMessage))
-    {
-        if (isSuccess)
-        {
-            <SuccessAlert Value="@promptMessage" />
-        }
-        else
-        {
-            <ErrorAlert Value="@promptMessage" />
-        }
-    }
     <h2 class="register-heading">Register</h2>
     <p class="password-info">Password should have a minimum of 8 characters and must contain atleast one uppercase, one lowercase and a digit</p>
     <EditForm EditContext="@editContext" OnValidSubmit="@HandleValidSubmit" class="form-section">
@@ -75,23 +67,21 @@
 
 @code {
     private RegisterModel registerModel = new () { Role = "User" };
-    private EditContext editContext;
-    private ValidationMessageStore modelState;
-    private string promptMessage = String.Empty;
-    private bool isSuccess;
+    private EditContext? editContext;
+    private ValidationMessageStore? modelState;
 
     protected override void OnInitialized()
     {
-        editContext = new(registerModel);
-        modelState = new ValidationMessageStore(editContext);
+        editContext = new (registerModel);
+        modelState = new (editContext);
     }
 
     private async Task<bool> EmailExists()
     {
         bool emailExists = false;
 
-        FieldIdentifier emailControlIdentifier = editContext.Field(nameof(registerModel.Email));
-        modelState.Clear(emailControlIdentifier);
+        FieldIdentifier emailControlIdentifier = editContext!.Field(nameof(registerModel.Email));
+        modelState!.Clear(emailControlIdentifier);
 
         if (!String.IsNullOrWhiteSpace(registerModel.Email))
         {
@@ -117,14 +107,17 @@
 
             if (response.IsSuccessStatusCode)
             {
-                promptMessage = "User has been created successfully";
-                isSuccess = true;
+                
             }
             else
             {
-                promptMessage = "An error occured while creating the user";
-                isSuccess = false;
+                
             }
         }
+    }
+
+    public void Dispose()
+    {
+        
     }
 }
