@@ -71,12 +71,12 @@
 
             if (response.IsSuccessStatusCode)
             {
-                snackBar.Add("User has been added successfully", Severity.Success);
                 navigationManager.NavigateTo("/");
+                snackBar.Add("User has been added successfully", Severity.Success);
             }
             else
             {
-                snackBar.Add("An error occured while creating the user.", Severity.Error);
+                snackBar.Add("An error occured while creating the user", Severity.Error);
             }
         }
     }
