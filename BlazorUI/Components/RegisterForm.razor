@@ -1,5 +1,6 @@
 ﻿@inject HttpClient httpClient
 @inject NavigationManager navigationManager
+@inject ISnackbar snackBar
 
 <article>
     <MudCard class="container">
@@ -70,14 +71,13 @@
 
             if (response.IsSuccessStatusCode)
             {
-
+                snackBar.Add("User has been added successfully", Severity.Success);
+                navigationManager.NavigateTo("/");
             }
             else
             {
-
+                snackBar.Add("An error occured while creating the user.", Severity.Error);
             }
         }
-
-
     }
 }
