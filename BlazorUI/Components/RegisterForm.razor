@@ -1,79 +1,42 @@
-﻿@implements IDisposable
-
-@inject HttpClient httpClient
+﻿@inject HttpClient httpClient
 @inject NavigationManager navigationManager
 
-<article class="container">
-    <h2 class="register-heading">Register</h2>
-    <p class="password-info">Password should have a minimum of 8 characters and must contain atleast one uppercase, one lowercase and a digit</p>
-    <EditForm EditContext="@editContext" OnValidSubmit="@HandleValidSubmit" class="form-section">
-        <DataAnnotationsValidator />
-        <section class="input-section">
-            <label for="FirstName">First Name</label>
-            <InputText @bind-Value="@registerModel.FirstName" id="FirstName" class="text-input" />
-            <div class="validation-container">
-                <ValidationMessage For="@(() => registerModel.FirstName)" />
-            </div>
-        </section>
-        <section class="input-section">
-            <label for="LastName">Last Name</label>
-            <InputText @bind-Value="@registerModel.LastName" id="LastName" class="text-input" />
-            <div class="validation-container">
-                <ValidationMessage For="@(() => registerModel.LastName)" />
-            </div>
-        </section>
-        <section class="input-section">
-            <label for="Email">Email</label>
-            <InputText @bind-Value="@registerModel.Email" @bind-Value:after="@EmailExists" id="Email" class="text-input" />
-            <div class="validation-container">
-                <ValidationMessage For="@(() => registerModel.Email)" />
-            </div>
-        </section>
-        <section class="input-section">
-            <label for="Password">Password</label>
-            <InputText @bind-Value="@registerModel.Password" type="password" id="Password" class="text-input" />
-            <div class="validation-container">
-                <ValidationMessage For="@(() => registerModel.Password)" />
-            </div>
-        </section>
-        <section class="input-section">
-            <label for="ConfirmPassword">Confirm Password</label>
-            <InputText @bind-Value="@registerModel.ConfirmPassword" type="password" id="ConfirmPassword" class="text-input" />
-            <div class="validation-container">
-                <ValidationMessage For="@(() => registerModel.ConfirmPassword)" />
-            </div>
-        </section>
-        <section class="input-section">
-            <p>Role</p>
-            <InputRadioGroup id="Role" @bind-Value="@registerModel.Role">
-                <div class="radio-section">
-                    <div class="user-value">
-                        <InputRadio Value="@("User")" id="User" />
-                        <label for="User" class="role-label">User</label>
-                    </div>
-                    <div class="admin-value">
-                        <InputRadio Value="@("Admin")" id="Admin" />
-                        <label for="Admin" class="role-label">Admin</label>
-                    </div>
-                </div>
-            </InputRadioGroup>
-        </section>
-        <section class="input-section">
-            <input type="submit" value="Register" class="submit-btn" />
-        </section>
-    </EditForm>
-    <a href="/" class="login-btn">Already a user?Login</a>
+<article>
+    <MudCard class="container">
+        <EditForm EditContext="editContext" OnValidSubmit="HandleValidSubmit">
+            <MudCardHeader>
+                <h2>Register</h2>
+                <p class="password-info">Password should have a minimum of 8 characters and must contain atleast one uppercase, one lowercase and a digit</p>
+            </MudCardHeader>
+            <MudCardContent>
+                <DataAnnotationsValidator />
+                <MudTextField Label="First Name" @bind-Value="registerModel.FirstName" For="(() => registerModel.FirstName)" />
+                <MudTextField Label="Last Name" @bind-Value="registerModel.LastName" For="(() => registerModel.LastName)" />
+                <MudTextField Label="Email" @bind-Value="registerModel.Email" onchange="@EmailExists()" For="(() => registerModel.Email)" />
+                <MudTextField Label="Password" @bind-Value="registerModel.Password" For="(() => registerModel.Password)" InputType="InputType.Password" />
+                <MudTextField Label="Confirm Password" @bind-Value="registerModel.ConfirmPassword" For="(() => registerModel.ConfirmPassword)" InputType="InputType.Password" />
+                <MudRadioGroup T="string" @bind-value="registerModel.Role" @bind-SelectedOption="registerModel.Role">
+                    <MudRadio Option="@("User")">User</MudRadio>
+                    <MudRadio Option="@("Admin")">Admin</MudRadio>
+                </MudRadioGroup>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Register</MudButton>
+                <MudLink Href="/" Underline="Underline.Always">Already a user?Login</MudLink>
+            </MudCardActions>
+        </EditForm>
+    </MudCard>
 </article>
 
 @code {
-    private RegisterModel registerModel = new () { Role = "User" };
+    private RegisterModel registerModel = new() { Role = "User" };
     private EditContext? editContext;
     private ValidationMessageStore? modelState;
 
     protected override void OnInitialized()
     {
-        editContext = new (registerModel);
-        modelState = new (editContext);
+        editContext = new(registerModel);
+        modelState = new(editContext);
     }
 
     private async Task<bool> EmailExists()
@@ -107,17 +70,14 @@
 
             if (response.IsSuccessStatusCode)
             {
-                
+
             }
             else
             {
-                
+
             }
         }
-    }
 
-    public void Dispose()
-    {
-        
+
     }
 }
