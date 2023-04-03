@@ -1,36 +1,29 @@
-﻿@implements IDisposable
+﻿@inject HttpClient httpClient
+@inject ISnackbar snackBar
 
-@inject HttpClient httpClient
-
-<article class="container">
-    <h2 class="login-heading">Login</h2>
-    <EditForm Model="@loginModel" class="form-section" OnValidSubmit="@HandleSubmit">
-        <DataAnnotationsValidator />
-        <section class="input-section">
-            <label for="Email">Email</label>
-            <InputText @bind-Value="@loginModel.Email" id="Email" class="text-input" />
-            <div class="validation-container">
-                <ValidationMessage For="@(() => loginModel.Email)" />
-            </div>
-        </section>
-        <section class="input-section">
-            <label for="Password">Password</label>
-            <InputText @bind-Value="@loginModel.Password" type="password" id="Password" class="text-input" />
-            <div class="validation-container">
-                <ValidationMessage For="@(() => loginModel.Password)" />
-            </div>
-        </section>
-        <section class="input-section">
-            <input type="submit" value="Login" class="submit-btn" />
-        </section>
-    </EditForm>
-    <a href="/register" class="register-btn">Create a new user</a>
+<article>
+    <MudCard class="container">
+        <EditForm Model="loginModel" OnValidSubmit="HandleValidSubmit">
+            <MudCardHeader>
+                <h2>Login</h2>
+            </MudCardHeader>
+            <MudCardContent>
+                <DataAnnotationsValidator />
+                <MudTextField Label="Email" @bind-Value="loginModel.Email" For="(() => loginModel.Email)" />
+                <MudTextField Label="Password" @bind-Value="loginModel.Password" For="(() => loginModel.Password)" InputType="InputType.Password" />
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Login</MudButton>
+                <MudLink Href="/register" Underline="Underline.Always">Create a new user</MudLink>
+            </MudCardActions>
+        </EditForm>
+    </MudCard>
 </article>
 
 @code {
     private LoginModel loginModel = new();
 
-    private async Task HandleSubmit()
+    private async Task HandleValidSubmit()
     {
         HttpResponseMessage response = await httpClient.PostAsJsonAsync("Identity/Login", loginModel);
 
@@ -40,12 +33,7 @@
         }
         else
         {
-            
+            snackBar.Add("Email or Password is incorrect", Severity.Error);
         }
-    }
-
-    public void Dispose()
-    {
-        
     }
 }

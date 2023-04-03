@@ -1,56 +1,25 @@
-﻿.container {
-    border: 1px solid black;
+﻿::deep .container {
     padding: 1em;
     width: 35%;
     margin: auto;
     border-radius: 7px;
 }
 
-.login-heading {
-    text-align: center;
+::deep .mud-card-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5em;
+    padding: 8px;
 }
 
-::deep .form-section {
-    margin-top: 2em;
+::deep .mud-card-content {
+    padding: 8px;
 }
 
-.input-section:not(:first-child) {
-    margin-top: 1em;
-}
-
-::deep .text-input {
-    width: 100%;
-    padding: 0.5em;
-    margin-top: 0.3em;
-}
-
-::deep .validation-message {
-    color: red;
-}
-
-    ::deep .validation-message:not(:first-child) {
-        display: none;
-    }
-
-.submit-btn {
-    background-color: var(--btn-color);
-    border: none;
-    color: white;
-    padding: 0.5em;
-    text-align: center;
-    font-size: 1rem;
-    border-radius: 5px;
-    cursor: pointer;
-    display: block;
-    margin: auto;
-}
-
-    .submit-btn:hover {
-        background-color: var(--btn-hover-color);
-    }
-
-.register-btn{
-    margin-top: 1em;
-    display: block;
-    text-align:center;
+::deep .mud-card-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5em;
 }
