@@ -1,24 +1,32 @@
 ﻿@inherits LayoutComponentBase
 
-<MudLayout>
-    <MudAppBar>
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleSidebar" />
-    </MudAppBar>
-    <MudDrawer @bind-Open="_sideBarOpen" Elevation="1">
-        <MudDrawerHeader>
-            <MudText Typo="Typo.h5" Color="Color.Dark" Style="margin-top:10px; margin-left:15px;">Shopping App</MudText>
-        </MudDrawerHeader>
-        <MudNavMenu>
-            <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="Icons.Filled.Home">Categories</MudNavLink>
-            <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="Icons.Filled.Home">Items</MudNavLink>
-        </MudNavMenu>
-    </MudDrawer>
-    <MudMainContent>
-        <MudContainer>
-            @Body
-        </MudContainer>
-    </MudMainContent>
-</MudLayout>
+<article>
+    <MudLayout>
+        <MudAppBar>
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleSidebar" />
+            <MudSpacer />
+                <MudLink Href="/home" Color="Color.Inherit" Class="main-heading" Underline="Underline.None">Shopping App</MudLink>
+            <MudSpacer />
+            <MudTooltip Text="Logout">
+                <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" Edge="Edge.End" />
+            </MudTooltip>
+        </MudAppBar>
+        <MudDrawer @bind-Open="_sideBarOpen" Elevation="1">
+            <MudDrawerHeader>
+                <MudText Typo="Typo.h5" Color="Color.Dark" Class="drawer-heading">Shopping App</MudText>
+            </MudDrawerHeader>
+            <MudNavMenu>
+                <MudNavLink Href="/categories" Match="NavLinkMatch.All" Icon="Icons.Filled.Home">Categories</MudNavLink>
+                <MudNavLink Href="/items" Match="NavLinkMatch.All" Icon="Icons.Filled.Home">Items</MudNavLink>
+            </MudNavMenu>
+        </MudDrawer>
+        <MudMainContent>
+            <MudContainer>
+                @Body
+            </MudContainer>
+        </MudMainContent>
+    </MudLayout>
+</article>
 
 <MudThemeProvider />
 <MudSnackbarProvider />
@@ -29,6 +37,6 @@
     private void ToggleSidebar()
     {
         _sideBarOpen = !_sideBarOpen;
-    } 
+    }
 }
 

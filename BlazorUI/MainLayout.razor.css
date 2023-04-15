@@ -1,0 +1,8 @@
+﻿::deep .main-heading {
+    font-size: 1.5rem;
+}
+
+::deep .drawer-heading {
+    margin-top: 10px;
+    margin-left: 15px;
+}
