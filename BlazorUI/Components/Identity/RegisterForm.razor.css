@@ -5,7 +5,7 @@
     border-radius: 7px;
 }
 
-.password-info {
+::deep .password-info {
     color: brown;
 }
 

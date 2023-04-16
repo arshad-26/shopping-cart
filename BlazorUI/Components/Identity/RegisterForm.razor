@@ -6,8 +6,8 @@
     <MudCard class="container">
         <EditForm EditContext="editContext" OnValidSubmit="HandleValidSubmit">
             <MudCardHeader>
-                <h2>Register</h2>
-                <p class="password-info">Password should have a minimum of 8 characters and must contain atleast one uppercase, one lowercase and a digit</p>
+                <MudText Typo="Typo.h5">Register</MudText>
+                <MudText Typo="Typo.body2" Class="password-info">Password should have a minimum of 8 characters and must contain atleast one uppercase, one lowercase and a digit</MudText>
             </MudCardHeader>
             <MudCardContent>
                 <DataAnnotationsValidator />
