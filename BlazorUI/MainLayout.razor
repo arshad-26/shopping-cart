@@ -2,24 +2,8 @@
 
 <article>
     <MudLayout>
-        <MudAppBar>
-            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleSidebar" />
-            <MudSpacer />
-                <MudLink Href="/home" Color="Color.Inherit" Class="main-heading" Underline="Underline.None">Shopping App</MudLink>
-            <MudSpacer />
-            <MudTooltip Text="Logout">
-                <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" Edge="Edge.End" />
-            </MudTooltip>
-        </MudAppBar>
-        <MudDrawer @bind-Open="_sideBarOpen" Elevation="1">
-            <MudDrawerHeader>
-                <MudText Typo="Typo.h5" Color="Color.Dark" Class="drawer-heading">Shopping App</MudText>
-            </MudDrawerHeader>
-            <MudNavMenu>
-                <MudNavLink Href="/categories" Match="NavLinkMatch.All">Categories</MudNavLink>
-                <MudNavLink Href="/items" Match="NavLinkMatch.All">Items</MudNavLink>
-            </MudNavMenu>
-        </MudDrawer>
+        <AppBar OnSidebarToggled="ToggleSidebar" />
+        <NavMenu SidebarOpen="_sidebarOpen" />
         <MudMainContent>
             <MudContainer>
                 @Body
@@ -32,11 +16,8 @@
 <MudSnackbarProvider />
 
 @code{
-    public bool _sideBarOpen { get; set; }
+    private bool _sidebarOpen = false;
 
-    private void ToggleSidebar()
-    {
-        _sideBarOpen = !_sideBarOpen;
-    }
+    private void ToggleSidebar() => _sidebarOpen = !_sidebarOpen;
 }
 

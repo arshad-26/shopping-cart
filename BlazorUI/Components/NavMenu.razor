@@ -1,0 +1,14 @@
+﻿<MudDrawer @bind-Open="SidebarOpen" Elevation="1">
+    <MudDrawerHeader>
+        <MudText Typo="Typo.h5" Color="Color.Dark" Class="drawer-heading">Shopping App</MudText>
+    </MudDrawerHeader>
+    <MudNavMenu>
+        <MudNavLink Href="/categories" Match="NavLinkMatch.All">Categories</MudNavLink>
+        <MudNavLink Href="/items" Match="NavLinkMatch.All">Items</MudNavLink>
+    </MudNavMenu>
+</MudDrawer>
+
+@code {
+    [Parameter]
+    public bool SidebarOpen { get; set; }
+}
