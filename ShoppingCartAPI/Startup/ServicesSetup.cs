@@ -25,7 +25,7 @@ public static class ServicesSetup
     public static IServiceCollection RegisterDependencyInjection(this IServiceCollection services)
     {
         // Default Services
-        services.AddControllers();
+        services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.PropertyNamingPolicy = null);
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
 

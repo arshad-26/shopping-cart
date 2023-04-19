@@ -78,7 +78,13 @@ public class IdentityController : ControllerBase
 			string token = GetToken(userClaims);
 			string refreshToken = await GetRefreshToken(user.Id);
 
-			return Ok(new { token, refreshToken });
+			TokenModel tokenInfo = new()
+			{
+				Token = token,
+				RefreshToken = refreshToken
+			};
+
+			return Ok(tokenInfo);
 		}
 
 		return Unauthorized();

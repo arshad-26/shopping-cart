@@ -1,5 +1,7 @@
 ﻿@inject HttpClient httpClient
 @inject ISnackbar snackBar
+@inject ISessionStorageService sessionStorage
+@inject NavigationManager navigationManager
 
 <article>
     <MudCard class="container">
@@ -29,7 +31,14 @@
 
         if (response.IsSuccessStatusCode)
         {
+            string responseJson = await response.Content.ReadAsStringAsync();
+            Console.WriteLine(responseJson);
+            TokenModel? tokenInfo = JsonSerializer.Deserialize<TokenModel>(responseJson);
 
+            await sessionStorage.SetItemAsync("Token", tokenInfo!.Token);
+            await sessionStorage.SetItemAsync("RefreshToken", tokenInfo!.RefreshToken);
+
+            navigationManager.NavigateTo("/home");
         }
         else
         {

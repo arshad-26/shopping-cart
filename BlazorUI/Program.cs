@@ -2,6 +2,7 @@ using BlazorUI;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor.Services;
+using Blazored.SessionStorage;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -15,5 +16,7 @@ builder.Services.AddMudServices(config =>
     config.SnackbarConfiguration.ClearAfterNavigation = true;
     config.SnackbarConfiguration.VisibleStateDuration = 10000;
 });
+
+builder.Services.AddBlazoredSessionStorage();
 
 await builder.Build().RunAsync();
