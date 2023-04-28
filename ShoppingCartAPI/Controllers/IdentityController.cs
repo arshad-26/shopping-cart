@@ -117,7 +117,13 @@ public class IdentityController : ControllerBase
 		string newToken = GetToken(userClaims);
 		string newRefreshToken = await GetRefreshToken(user.Id, true);
 
-		return Ok(new { newToken, newRefreshToken });
+		TokenModel tokenInfo = new()
+		{
+			Token = newToken,
+			RefreshToken = newRefreshToken
+		};
+
+		return Ok(tokenInfo);
 	}
 
 	[HttpGet]

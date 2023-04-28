@@ -1,4 +1,4 @@
-﻿@inject HttpClient httpClient
+﻿@inject IHttpClientFactory _clientFactory
 @inject NavigationManager navigationManager
 @inject ISnackbar snackBar
 
@@ -49,6 +49,7 @@
 
         if (!String.IsNullOrWhiteSpace(registerModel.Email))
         {
+            HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
             emailExists = await httpClient.GetFromJsonAsync<bool>($"Identity/EmailExists?email={registerModel.Email}");
 
             if (emailExists)
@@ -67,6 +68,7 @@
 
         if (!emailExists)
         {
+            HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
             HttpResponseMessage response = await httpClient.PostAsJsonAsync("Identity/Register", registerModel);
 
             if (response.IsSuccessStatusCode)

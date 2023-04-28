@@ -1,0 +1,12 @@
+﻿@inject NavigationManager _navigationManager
+@inject ISessionStorageService _sessionStorage
+
+@code {
+    protected async override Task OnInitializedAsync()
+    {
+        await _sessionStorage.RemoveItemAsync("Token");
+        await _sessionStorage.RemoveItemAsync("RefreshToken");
+
+        _navigationManager.NavigateTo("/");
+    }
+}

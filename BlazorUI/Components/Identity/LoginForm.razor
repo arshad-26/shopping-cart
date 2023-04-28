@@ -1,7 +1,8 @@
-﻿@inject HttpClient httpClient
+﻿@inject IHttpClientFactory _clientFactory
 @inject ISnackbar snackBar
 @inject ISessionStorageService sessionStorage
 @inject NavigationManager navigationManager
+@inject AuthenticationProvider authProvider
 
 <article>
     <MudCard class="container">
@@ -27,16 +28,18 @@
 
     private async Task HandleValidSubmit()
     {
+        HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
         HttpResponseMessage response = await httpClient.PostAsJsonAsync("Identity/Login", loginModel);
 
         if (response.IsSuccessStatusCode)
         {
             string responseJson = await response.Content.ReadAsStringAsync();
-            Console.WriteLine(responseJson);
             TokenModel? tokenInfo = JsonSerializer.Deserialize<TokenModel>(responseJson);
 
             await sessionStorage.SetItemAsync("Token", tokenInfo!.Token);
             await sessionStorage.SetItemAsync("RefreshToken", tokenInfo!.RefreshToken);
+
+            authProvider.StateChanged();
 
             navigationManager.NavigateTo("/home");
         }

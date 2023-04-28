@@ -1,14 +1,28 @@
-﻿<MudAppBar>
+﻿@inject ISessionStorageService _sessionStorage
+@inject AuthenticationProvider _authProvider
+@inject NavigationManager _navigationManager
+
+<MudAppBar>
     <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="async () => await OnSidebarToggled.InvokeAsync()" />
     <MudSpacer />
     <MudLink Href="/home" Color="Color.Inherit" Class="main-heading" Underline="Underline.None">Shopping App</MudLink>
     <MudSpacer />
     <MudTooltip Text="Logout">
-        <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" Edge="Edge.End" />
+        <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" Edge="Edge.End" OnClick="async () => await LogoutAsync()" />
     </MudTooltip>
 </MudAppBar>
 
 @code {
     [Parameter]
     public EventCallback OnSidebarToggled { get; set; }
+
+    private async Task LogoutAsync()
+    {
+        await _sessionStorage.RemoveItemAsync("Token");
+        await _sessionStorage.RemoveItemAsync("RefreshToken");
+
+        _authProvider.StateChanged();
+
+        _navigationManager.NavigateTo("/");
+    }
 }
