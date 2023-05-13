@@ -1,5 +1,22 @@
 ﻿@page "/home"
+@implements IDisposable
+@inject IHttpClientFactory _clientFactory
+@inject AuthInterceptor _authInterceptor
 @attribute [Authorize]
 
-<h3>Home Page</h3>
+<h3>@str</h3>
+
+@code{
+    public string str { get; set; } = String.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _authInterceptor.RegisterEvent();
+
+        HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
+        str = await httpClient.GetStringAsync("Home/GetSample");
+    }
+
+    public void Dispose() => _authInterceptor.DisposeEvent();
+}
 

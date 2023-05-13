@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace BlazorUI.Handlers;
+namespace BlazorUI.Providers;
 
 public class AuthenticationProvider : AuthenticationStateProvider
 {
@@ -30,7 +30,7 @@ public class AuthenticationProvider : AuthenticationStateProvider
         JwtSecurityTokenHandler handler = new();
         JwtSecurityToken jwtSecurityToken = handler.ReadJwtToken(token);
 
-        IEnumerable<Claim> claimList = jwtSecurityToken.Claims.Where(x => x.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress" || x.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role");
+        IEnumerable<Claim> claimList = jwtSecurityToken.Claims.Where(x => x.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress" || x.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role" || x.Type == "exp");
         ClaimsIdentity identity = new(claimList, "jwt");
 
         return identity;

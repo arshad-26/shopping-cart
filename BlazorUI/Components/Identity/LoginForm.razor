@@ -33,8 +33,7 @@
 
         if (response.IsSuccessStatusCode)
         {
-            string responseJson = await response.Content.ReadAsStringAsync();
-            TokenModel? tokenInfo = JsonSerializer.Deserialize<TokenModel>(responseJson);
+            TokenModel? tokenInfo = await response.Content.ReadFromJsonAsync<TokenModel>();
 
             await sessionStorage.SetItemAsync("Token", tokenInfo!.Token);
             await sessionStorage.SetItemAsync("RefreshToken", tokenInfo!.RefreshToken);

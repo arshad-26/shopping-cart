@@ -105,7 +105,7 @@ public class IdentityController : ControllerBase
 		long ticks = long.Parse(tokenExp);
 		DateTime tokenExpTime = GetTokenExpTime(ticks);
 
-		if(user is null || user.RefreshToken!.Token != refreshToken || tokenExpTime > DateTime.UtcNow || user.RefreshToken!.ExpiresAt <= DateTime.UtcNow)
+		if(user is null || user.RefreshToken!.Token != refreshToken || (tokenExpTime - DateTime.UtcNow).TotalMinutes > 2 || user.RefreshToken!.ExpiresAt <= DateTime.UtcNow)
 		{
 			return BadRequest();
 		}
