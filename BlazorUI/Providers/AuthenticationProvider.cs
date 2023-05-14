@@ -20,7 +20,7 @@ public class AuthenticationProvider : AuthenticationStateProvider
     {
         string token = await _sessionStorage.GetItemAsync<string>("Token");
 
-        ClaimsIdentity identity = String.IsNullOrWhiteSpace(token) ? new ClaimsIdentity() : GetIdentityFromToken(token);
+        ClaimsIdentity identity = String.IsNullOrWhiteSpace(token) ? new() : GetIdentityFromToken(token);
 
         return await Task.FromResult(new AuthenticationState(new(identity)));
     }

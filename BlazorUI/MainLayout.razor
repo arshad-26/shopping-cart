@@ -6,7 +6,14 @@
         <NavMenu SidebarOpen="_sidebarOpen" />
         <MudMainContent>
             <MudContainer>
-                @Body
+                <ErrorBoundary @ref="errorBoundary">
+                    <ChildContent>
+                        @Body
+                    </ChildContent>
+                    <ErrorContent>
+                        <RedirectToLogin />
+                    </ErrorContent>
+                </ErrorBoundary>
             </MudContainer>
         </MudMainContent>
     </MudLayout>
@@ -17,6 +24,12 @@
 
 @code{
     private bool _sidebarOpen = false;
+    private ErrorBoundary? errorBoundary;
+
+    protected override void OnParametersSet()
+    {
+        errorBoundary?.Recover();
+    }
 
     private void ToggleSidebar() => _sidebarOpen = !_sidebarOpen;
 }

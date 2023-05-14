@@ -18,11 +18,11 @@ builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.Get
 builder.Services.AddScoped<AuthInterceptor>();
 
 builder.Services.AddHttpClient("ServerAPI", (serviceProvider, client) => {
-    client.BaseAddress = new Uri("http://localhost:38451/api/");
+    client.BaseAddress = new("http://localhost:38451/api/");
     client.EnableIntercept(serviceProvider);
 });
 
-builder.Services.AddHttpClient("RefreshAPI", client => client.BaseAddress = new Uri("http://localhost:38451/api/"));
+builder.Services.AddHttpClient("RefreshAPI", client => client.BaseAddress = new("http://localhost:38451/api/"));
 
 builder.Services.AddHttpClientInterceptor();
 builder.Services.AddAuthorizationCore();
