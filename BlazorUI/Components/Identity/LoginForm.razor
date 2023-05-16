@@ -26,10 +26,17 @@
 @code {
     private LoginModel loginModel = new();
 
+    [Parameter]
+    public EventCallback LoadingToggled { get; set; }
+
     private async Task HandleValidSubmit()
     {
+        await LoadingToggled.InvokeAsync();
+
         HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
         HttpResponseMessage response = await httpClient.PostAsJsonAsync("Identity/Login", loginModel);
+
+        await LoadingToggled.InvokeAsync();
 
         if (response.IsSuccessStatusCode)
         {

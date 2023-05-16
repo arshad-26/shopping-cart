@@ -34,6 +34,9 @@
     private EditContext? editContext;
     private ValidationMessageStore? modelState;
 
+    [Parameter]
+    public EventCallback LoadingToggled { get; set; }
+
     protected override void OnInitialized()
     {
         editContext = new(registerModel);
@@ -68,8 +71,12 @@
 
         if (!emailExists)
         {
+            await LoadingToggled.InvokeAsync();
+
             HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
             HttpResponseMessage response = await httpClient.PostAsJsonAsync("Identity/Register", registerModel);
+
+            await LoadingToggled.InvokeAsync();
 
             if (response.IsSuccessStatusCode)
             {

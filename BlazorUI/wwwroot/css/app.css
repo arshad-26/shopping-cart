@@ -25,6 +25,14 @@ h1:focus {
     outline: none;
 }
 
+.identity-loading-spinner {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;

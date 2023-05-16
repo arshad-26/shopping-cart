@@ -2,6 +2,20 @@
 @layout IdentityLayout
 @attribute [AllowAnonymous]
 
-<MainHeading />
-<LoginForm />
+@if (isLoading)
+{
+    <div class="identity-loading-spinner">
+        <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+    </div>
+}
+else
+{
+    <MainHeading />
+    <LoginForm LoadingToggled="ToggleLoading" />
+}
 
+@code{
+    private bool isLoading;
+
+    private void ToggleLoading() => isLoading = !isLoading;
+}
