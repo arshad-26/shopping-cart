@@ -29,6 +29,9 @@ public static class ServicesSetup
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
 
+        // Mapper
+        services.AddAutoMapper(typeof(Program));
+
         // Singleton Services
         services.AddSingleton<JWTModel>(_jwtModel);
 

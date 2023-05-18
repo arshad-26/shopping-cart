@@ -21,13 +21,9 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.UseDeveloperExceptionPage();
-}
-else
-{
-    app.ConfigureExceptionHandler();
 }
 
+app.ConfigureExceptionHandler();
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
