@@ -98,7 +98,7 @@ public class IdentityController : ControllerBase
 
 		ClaimsPrincipal principal = GetPrincipalFromExpiredToken(token);
 
-		string email = principal.Claims.FirstOrDefault(x => x.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")!.Value;
+		string email = principal.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email)!.Value;
 		ApplicationUser? user = await _userManager.Users.Include(x => x.RefreshToken).FirstOrDefaultAsync(x => x.Email == email);
 
 		string tokenExp = principal.Claims.FirstOrDefault(x => x.Type == "exp")!.Value;
@@ -110,7 +110,7 @@ public class IdentityController : ControllerBase
 			return BadRequest();
 		}
 
-		string[] userClaimKeys = new string[] { "FirstName", "LastName", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", "http://schemas.microsoft.com/ws/2008/06/identity/claims/role" };
+		string[] userClaimKeys = new string[] { "FirstName", "LastName", ClaimTypes.Email, ClaimTypes.Role };
 
 		List<Claim> userClaims = principal.Claims.Where(x => userClaimKeys.Contains(x.Type)).ToList();
 

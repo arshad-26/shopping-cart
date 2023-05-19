@@ -30,7 +30,7 @@ public class AuthenticationProvider : AuthenticationStateProvider
         JwtSecurityTokenHandler handler = new();
         JwtSecurityToken jwtSecurityToken = handler.ReadJwtToken(token);
 
-        IEnumerable<Claim> claimList = jwtSecurityToken.Claims.Where(x => x.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress" || x.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role" || x.Type == "exp");
+        IEnumerable<Claim> claimList = jwtSecurityToken.Claims.Where(x => x.Type == ClaimTypes.Email || x.Type == ClaimTypes.Role || x.Type == "exp");
         ClaimsIdentity identity = new(claimList, "jwt");
 
         return identity;
