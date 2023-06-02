@@ -4,37 +4,50 @@
 @inject IHttpClientFactory _clientFactory
 @inject AuthInterceptor _authInterceptor
 
-<article>
-    <MudTable Items="categoryList" Hover="true" Filter="new Func<CategoryDTO, bool>(FilterFunc1)">
-        <ToolBarContent>
-            <MudText Typo="Typo.h6">Manage Categories</MudText>
-            <MudSpacer />
-            <MudTextField @bind-Value="searchString1" Immediate="true" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-        </ToolBarContent>
-        <HeaderContent>
-            <MudTh Class="table-heading">
-                <MudTableSortLabel SortBy="new Func<CategoryDTO, string>(x => x.Name)">Category</MudTableSortLabel>
-            </MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd DataLabel="Category">@context.Name</MudTd>
-        </RowTemplate>
-        <PagerContent>
-            <MudTablePager />
-        </PagerContent>
-    </MudTable>
-</article>
+@if (isLoading)
+{
+    <div class="session-loading-spinner">
+        <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+    </div>
+}
+else
+{
+    <article>
+        <MudTable Items="categoryList" Hover="true" Filter="new Func<CategoryDTO, bool>(FilterFunc1)">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Manage Categories</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="searchString1" Immediate="true" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh Class="table-heading">
+                    <MudTableSortLabel SortBy="new Func<CategoryDTO, string>(x => x.Name)">Category</MudTableSortLabel>
+                </MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Category">@context.Name</MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+    </article>
+}
 
 @code {
     private List<CategoryDTO>? categoryList;
     private string searchString1 = "";
-    
+    private bool isLoading = true;
+
     protected override async Task OnInitializedAsync()
     {
         _authInterceptor.RegisterEvent();
 
         HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
         categoryList = await httpClient.GetFromJsonAsync<List<CategoryDTO>>("Item/GetCategories");
+
+        isLoading = false;
+        StateHasChanged();
     }
 
     private bool FilterFunc1(CategoryDTO category) => FilterFunc(category, searchString1);
