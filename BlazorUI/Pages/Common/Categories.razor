@@ -1,8 +1,54 @@
 ﻿@page "/categories"
+@implements IDisposable
 @attribute [Authorize(Roles = "Admin")]
+@inject IHttpClientFactory _clientFactory
+@inject AuthInterceptor _authInterceptor
 
-<h3>Manage Categories</h3>
+<article>
+    <MudTable Items="categoryList" Hover="true" Filter="new Func<CategoryDTO, bool>(FilterFunc1)">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Manage Categories</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="searchString1" Immediate="true" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh Class="table-heading">
+                <MudTableSortLabel SortBy="new Func<CategoryDTO, string>(x => x.Name)">Category</MudTableSortLabel>
+            </MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Category">@context.Name</MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>
+</article>
 
 @code {
+    private List<CategoryDTO>? categoryList;
+    private string searchString1 = "";
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _authInterceptor.RegisterEvent();
 
+        HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
+        categoryList = await httpClient.GetFromJsonAsync<List<CategoryDTO>>("Item/GetCategories");
+    }
+
+    private bool FilterFunc1(CategoryDTO category) => FilterFunc(category, searchString1);
+
+    private bool FilterFunc(CategoryDTO category, string searchString)
+    {
+        if (String.IsNullOrWhiteSpace(searchString))
+            return true;
+
+        if (category.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
+    }
+
+    public void Dispose() => _authInterceptor.DisposeEvent();
 }
