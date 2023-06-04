@@ -3,6 +3,7 @@
 @attribute [Authorize(Roles = "Admin")]
 @inject IHttpClientFactory _clientFactory
 @inject AuthInterceptor _authInterceptor
+@inject IDialogService _dialog
 
 @if (isLoading)
 {
@@ -18,6 +19,8 @@ else
                 <MudText Typo="Typo.h6">Manage Categories</MudText>
                 <MudSpacer />
                 <MudTextField @bind-Value="searchString1" Immediate="true" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                <MudSpacer />
+                <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Tertiary" Size="Size.Medium" OnClick="@((e) => OpenDialog())" />
             </ToolBarContent>
             <HeaderContent>
                 <MudTh Class="table-heading">
@@ -27,6 +30,9 @@ else
             <RowTemplate>
                 <MudTd DataLabel="Category">@context.Name</MudTd>
             </RowTemplate>
+            <NoRecordsContent>
+                <MudText>No Records Found</MudText>
+            </NoRecordsContent>
             <PagerContent>
                 <MudTablePager />
             </PagerContent>
@@ -63,5 +69,7 @@ else
         return false;
     }
 
+    private void OpenDialog() => _dialog.Show<Category>("Add Category");
+    
     public void Dispose() => _authInterceptor.DisposeEvent();
 }

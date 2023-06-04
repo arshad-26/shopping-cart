@@ -1,0 +1,28 @@
+﻿<MudDialog>
+    <DialogContent>
+        <article>
+            <EditForm Model="categoryModel" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <MudTextField Label="Category" @bind-Value="categoryModel.Category" For="(() => categoryModel.Category)" />
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="submit-btn">Submit</MudButton>
+            </EditForm>
+        </article>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private CategoryModel categoryModel = new();
+
+    [CascadingParameter]
+    public MudDialogInstance MudDialog { get; set; } = new ();
+
+    private async Task HandleValidSubmit()
+    {
+        
+    }
+
+    private void Cancel() => MudDialog.Close(DialogResult.Ok(true));
+}
