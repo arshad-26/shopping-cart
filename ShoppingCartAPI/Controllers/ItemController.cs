@@ -5,6 +5,7 @@ using DTO.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ShoppingCartAPI.Controllers;
 
@@ -42,5 +43,16 @@ public class ItemController : ControllerBase
         CategoryModel mappedCategory = _mapper.Map<CategoryModel>(category);
 
         return Ok(mappedCategory);
+    }
+
+    [HttpDelete]
+    public async Task<IActionResult> DeleteCategory(int categoryID)
+    {
+        Category? category = await _dbContext.Category.FirstOrDefaultAsync(x => x.CategoryID == categoryID);
+
+        _dbContext.Category.Remove(category!);
+        await _dbContext.SaveChangesAsync();
+
+        return Ok(category!.CategoryID);
     }
 }

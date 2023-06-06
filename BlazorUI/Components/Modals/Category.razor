@@ -1,6 +1,7 @@
 ﻿@inject IHttpClientFactory _clientFactory
 @inject ISnackbar _snackBar
 @inject ComponentBus _bus
+@inject IMapper _mapper
 
 <MudDialog>
     <DialogContent>
@@ -30,7 +31,9 @@
         if (response.IsSuccessStatusCode)
         {
             CategoryModel? addedCategory = await response.Content.ReadFromJsonAsync<CategoryModel>();
-            await _bus.Publish(addedCategory);
+            CategoryAddedEvent categoryAddedEvent = _mapper.Map<CategoryAddedEvent>(addedCategory);
+
+            await _bus.Publish(categoryAddedEvent);
 
             _snackBar.Add("Category has been added successfully", Severity.Success);
         }

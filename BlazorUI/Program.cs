@@ -19,6 +19,9 @@ builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.Get
 builder.Services.AddScoped<AuthInterceptor>();
 builder.Services.AddScoped<ComponentBus>();
 
+// Mapper
+builder.Services.AddAutoMapper(typeof(Program));
+
 builder.Services.AddHttpClient("ServerAPI", (serviceProvider, client) => {
     client.BaseAddress = new("http://localhost:38451/api/");
     client.EnableIntercept(serviceProvider);

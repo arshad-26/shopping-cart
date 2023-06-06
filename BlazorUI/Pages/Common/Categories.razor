@@ -5,6 +5,7 @@
 @inject AuthInterceptor _authInterceptor
 @inject IDialogService _dialog
 @inject ComponentBus _bus
+@inject IMapper _mapper
 
 @if (isLoading)
 {
@@ -21,15 +22,21 @@ else
                 <MudSpacer />
                 <MudTextField @bind-Value="searchString1" Immediate="true" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
                 <MudSpacer />
-                <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Tertiary" Size="Size.Medium" OnClick="@((e) => OpenDialog())" />
+                <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Tertiary" Size="Size.Medium" OnClick="@((e) => OpenAddDialog())" />
             </ToolBarContent>
             <HeaderContent>
                 <MudTh Class="table-heading">
                     <MudTableSortLabel SortBy="new Func<CategoryModel, string>(x => x.Name)">Category</MudTableSortLabel>
                 </MudTh>
+                <MudTh>
+                    Actions
+                </MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="Category">@context.Name</MudTd>
+                <MudTd>
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Variant="Variant.Filled" Color="Color.Tertiary" Size="Size.Small" OnClick="() => OpenDeleteDialog(context.CategoryID)"></MudIconButton>
+                </MudTd>
             </RowTemplate>
             <NoRecordsContent>
                 <MudText>No Records Found</MudText>
@@ -50,7 +57,8 @@ else
     {
         _authInterceptor.RegisterEvent();
 
-        _bus.Subscribe<CategoryModel>(CategoryAddedHandler);
+        _bus.Subscribe<CategoryAddedEvent>(CategoryAddedHandler);
+        _bus.Subscribe<CategoryDeletedEvent>(CategoryDeletedHandler);
 
         HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
         categoryList = await httpClient.GetFromJsonAsync<List<CategoryModel>>("Item/GetCategories");
@@ -74,17 +82,40 @@ else
 
     private void CategoryAddedHandler(MessageArgs args)
     {
-        CategoryModel newCategory = args.GetMessage<CategoryModel>();
+        CategoryAddedEvent categoryAddedEvent = args.GetMessage<CategoryAddedEvent>();
+        CategoryModel newCategory = _mapper.Map<CategoryModel>(categoryAddedEvent);
+
         categoryList!.Add(newCategory);
         StateHasChanged();
     }
 
-    private void OpenDialog() => _dialog.Show<Category>("Add Category");
+    private void CategoryDeletedHandler(MessageArgs args)
+    {
+        CategoryDeletedEvent categoryDeletedEvent = args.GetMessage<CategoryDeletedEvent>();
+
+        categoryList!.RemoveAll(x => x.CategoryID == categoryDeletedEvent.CategoryID);
+        StateHasChanged();
+    }
+
+    private void OpenAddDialog() => _dialog.Show<Category>("Add Category");
+
+    private void OpenDeleteDialog(int categoryID)
+    {
+        DialogParameters parameters = new();
+
+        parameters.Add("ContentText", "Are you sure you want to delete this record?");
+        parameters.Add("CategoryID", categoryID);
+
+        DialogOptions options = new() { MaxWidth = MaxWidth.ExtraSmall, Position = DialogPosition.Center };
+
+        _dialog.Show<DeleteDialog>("Delete", parameters, options);
+    }
 
     public void Dispose()
     {
         _authInterceptor.DisposeEvent();
-        _bus.UnSubscribe<CategoryModel>(CategoryAddedHandler);
+        _bus.UnSubscribe<CategoryAddedEvent>(CategoryAddedHandler);
+        _bus.UnSubscribe<CategoryDeletedEvent>(CategoryDeletedHandler);
     }
     
 }

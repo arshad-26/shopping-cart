@@ -1,0 +1,45 @@
+﻿@inject IHttpClientFactory _clientFactory
+@inject ComponentBus _bus
+@inject ISnackbar _snackBar
+
+<MudDialog>
+    <DialogContent>
+        <MudText>@ContentText</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Error" Variant="Variant.Filled" OnClick="Submit">Delete</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter]
+    public string ContentText { get; set; } = String.Empty;
+
+    [Parameter]
+    public int CategoryID { get; set; }
+
+    [CascadingParameter]
+    public MudDialogInstance MudDialog { get; set; } = new();
+
+    private async Task Submit()
+    {
+        MudDialog.Close(DialogResult.Ok(true));
+
+        HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
+        HttpResponseMessage response = await httpClient.DeleteAsync($"Item/DeleteCategory?categoryID={CategoryID}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            int categoryID = Convert.ToInt32(await response.Content.ReadAsStringAsync());
+            CategoryDeletedEvent categoryDeletedEvent = new() { CategoryID = categoryID };
+
+            await _bus.Publish(categoryDeletedEvent);
+
+            _snackBar.Add("Category has been deleted successfully", Severity.Success);
+        }
+        else
+        {
+            _snackBar.Add("An unexpected error occured", Severity.Error);
+        }
+    }
+}
