@@ -1,16 +1,16 @@
-﻿<MudDialog>
+﻿@inject IHttpClientFactory _clientFactory
+@inject ISnackbar _snackBar
+
+<MudDialog>
     <DialogContent>
         <article>
             <EditForm Model="categoryModel" OnValidSubmit="HandleValidSubmit">
                 <DataAnnotationsValidator />
-                <MudTextField Label="Category" @bind-Value="categoryModel.Category" For="(() => categoryModel.Category)" />
+                <MudTextField Label="Category" @bind-Value="categoryModel.Name" For="(() => categoryModel.Name)" />
                 <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="submit-btn">Submit</MudButton>
             </EditForm>
         </article>
     </DialogContent>
-    <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-    </DialogActions>
 </MudDialog>
 
 @code {
@@ -21,8 +21,18 @@
 
     private async Task HandleValidSubmit()
     {
+        MudDialog.Close(DialogResult.Ok(true));
         
-    }
+        HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
+        HttpResponseMessage response = await httpClient.PostAsJsonAsync("Item/AddCategory", categoryModel);
 
-    private void Cancel() => MudDialog.Close(DialogResult.Ok(true));
+        if (response.IsSuccessStatusCode)
+        {
+            _snackBar.Add("Category has been added successfully", Severity.Success);
+        }
+        else
+        {
+            _snackBar.Add("An unexpected error occured", Severity.Error);
+        }
+    }
 }

@@ -8,6 +8,6 @@ public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        CreateMap<Category, CategoryDTO>();
+        CreateMap<Category, CategoryModel>().ReverseMap();
     }
 }

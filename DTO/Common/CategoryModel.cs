@@ -9,6 +9,8 @@ namespace DTO.Common;
 
 public class CategoryModel
 {
+    public int CategoryID { get; set; }
+
     [Required(ErrorMessage = "This field is required")]
-    public string Category { get; set; } = default!;
+    public string Name { get; set; } = default!;
 }

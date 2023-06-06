@@ -26,8 +26,19 @@ public class ItemController : ControllerBase
     public IActionResult GetCategories()
     {
         List<Category> categoriesDb = _dbContext.Category.ToList();
-        List<CategoryDTO> categories = _mapper.Map<List<CategoryDTO>>(categoriesDb);
+        List<CategoryModel> categories = _mapper.Map<List<CategoryModel>>(categoriesDb);
 
         return Ok(categories);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> AddCategory(CategoryModel categoryModel)
+    {
+        Category category = _mapper.Map<Category>(categoryModel);
+        
+        await _dbContext.Category.AddAsync(category);
+        await _dbContext.SaveChangesAsync();
+
+        return Ok();
     }
 }

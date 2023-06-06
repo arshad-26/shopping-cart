@@ -14,7 +14,7 @@
 else
 {
     <article>
-        <MudTable Items="categoryList" Hover="true" Filter="new Func<CategoryDTO, bool>(FilterFunc1)">
+        <MudTable Items="categoryList" Hover="true" Filter="new Func<CategoryModel, bool>(FilterFunc1)">
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Manage Categories</MudText>
                 <MudSpacer />
@@ -24,7 +24,7 @@ else
             </ToolBarContent>
             <HeaderContent>
                 <MudTh Class="table-heading">
-                    <MudTableSortLabel SortBy="new Func<CategoryDTO, string>(x => x.Name)">Category</MudTableSortLabel>
+                    <MudTableSortLabel SortBy="new Func<CategoryModel, string>(x => x.Name)">Category</MudTableSortLabel>
                 </MudTh>
             </HeaderContent>
             <RowTemplate>
@@ -41,7 +41,7 @@ else
 }
 
 @code {
-    private List<CategoryDTO>? categoryList;
+    private List<CategoryModel>? categoryList;
     private string searchString1 = "";
     private bool isLoading = true;
 
@@ -50,15 +50,15 @@ else
         _authInterceptor.RegisterEvent();
 
         HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
-        categoryList = await httpClient.GetFromJsonAsync<List<CategoryDTO>>("Item/GetCategories");
+        categoryList = await httpClient.GetFromJsonAsync<List<CategoryModel>>("Item/GetCategories");
 
         isLoading = false;
         StateHasChanged();
     }
 
-    private bool FilterFunc1(CategoryDTO category) => FilterFunc(category, searchString1);
+    private bool FilterFunc1(CategoryModel category) => FilterFunc(category, searchString1);
 
-    private bool FilterFunc(CategoryDTO category, string searchString)
+    private bool FilterFunc(CategoryModel category, string searchString)
     {
         if (String.IsNullOrWhiteSpace(searchString))
             return true;
