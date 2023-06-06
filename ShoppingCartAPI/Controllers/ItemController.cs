@@ -39,6 +39,8 @@ public class ItemController : ControllerBase
         await _dbContext.Category.AddAsync(category);
         await _dbContext.SaveChangesAsync();
 
-        return Ok();
+        CategoryModel mappedCategory = _mapper.Map<CategoryModel>(category);
+
+        return Ok(mappedCategory);
     }
 }

@@ -4,6 +4,7 @@
 @inject IHttpClientFactory _clientFactory
 @inject AuthInterceptor _authInterceptor
 @inject IDialogService _dialog
+@inject ComponentBus _bus
 
 @if (isLoading)
 {
@@ -49,6 +50,8 @@ else
     {
         _authInterceptor.RegisterEvent();
 
+        _bus.Subscribe<CategoryModel>(CategoryAddedHandler);
+
         HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
         categoryList = await httpClient.GetFromJsonAsync<List<CategoryModel>>("Item/GetCategories");
 
@@ -69,7 +72,19 @@ else
         return false;
     }
 
+    private void CategoryAddedHandler(MessageArgs args)
+    {
+        CategoryModel newCategory = args.GetMessage<CategoryModel>();
+        categoryList!.Add(newCategory);
+        StateHasChanged();
+    }
+
     private void OpenDialog() => _dialog.Show<Category>("Add Category");
+
+    public void Dispose()
+    {
+        _authInterceptor.DisposeEvent();
+        _bus.UnSubscribe<CategoryModel>(CategoryAddedHandler);
+    }
     
-    public void Dispose() => _authInterceptor.DisposeEvent();
 }

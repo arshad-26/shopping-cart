@@ -1,5 +1,6 @@
 ﻿@inject IHttpClientFactory _clientFactory
 @inject ISnackbar _snackBar
+@inject ComponentBus _bus
 
 <MudDialog>
     <DialogContent>
@@ -22,12 +23,15 @@
     private async Task HandleValidSubmit()
     {
         MudDialog.Close(DialogResult.Ok(true));
-        
+
         HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
         HttpResponseMessage response = await httpClient.PostAsJsonAsync("Item/AddCategory", categoryModel);
 
         if (response.IsSuccessStatusCode)
         {
+            CategoryModel? addedCategory = await response.Content.ReadFromJsonAsync<CategoryModel>();
+            await _bus.Publish(addedCategory);
+
             _snackBar.Add("Category has been added successfully", Severity.Success);
         }
         else

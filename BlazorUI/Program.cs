@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using BlazorUI.Providers;
 using Toolbelt.Blazor.Extensions.DependencyInjection;
 using BlazorUI.Interceptors;
+using BlazorComponentBus;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -16,6 +17,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddScoped<AuthenticationProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<AuthenticationProvider>());
 builder.Services.AddScoped<AuthInterceptor>();
+builder.Services.AddScoped<ComponentBus>();
 
 builder.Services.AddHttpClient("ServerAPI", (serviceProvider, client) => {
     client.BaseAddress = new("http://localhost:38451/api/");
