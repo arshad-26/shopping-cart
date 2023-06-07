@@ -55,4 +55,8 @@ public class ItemController : ControllerBase
 
         return Ok(category!.CategoryID);
     }
+
+    [HttpGet]
+    public async Task<bool> CategoryExists(string category) => await _dbContext.Category.AnyAsync(x => x.Name == category);
+    
 }

@@ -6,9 +6,9 @@
 <MudDialog>
     <DialogContent>
         <article>
-            <EditForm Model="categoryModel" OnValidSubmit="HandleValidSubmit">
+            <EditForm EditContext="editContext" OnValidSubmit="HandleValidSubmit">
                 <DataAnnotationsValidator />
-                <MudTextField Label="Category" @bind-Value="categoryModel.Name" For="(() => categoryModel.Name)" />
+                <MudTextField Label="Category" @bind-Value="categoryModel.Name" For="(() => categoryModel.Name)" onchange="@CategoryExists()" />
                 <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="submit-btn">Submit</MudButton>
             </EditForm>
         </article>
@@ -17,9 +17,17 @@
 
 @code {
     private CategoryModel categoryModel = new();
+    private EditContext? editContext;
+    private ValidationMessageStore? modelState;
 
     [CascadingParameter]
     public MudDialogInstance MudDialog { get; set; } = new ();
+
+    protected override void OnInitialized()
+    {
+        editContext = new(categoryModel);
+        modelState = new(editContext);
+    }
 
     private async Task HandleValidSubmit()
     {
@@ -41,5 +49,27 @@
         {
             _snackBar.Add("An unexpected error occured", Severity.Error);
         }
+    }
+
+    private async Task<bool> CategoryExists()
+    {
+        bool categoryExists = false;
+
+        FieldIdentifier categoryControlIdentifier = editContext!.Field(nameof(categoryModel.Name));
+        modelState!.Clear(categoryControlIdentifier);
+
+        if (!String.IsNullOrWhiteSpace(categoryModel.Name))
+        {
+            HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
+            categoryExists = await httpClient.GetFromJsonAsync<bool>($"Item/CategoryExists?category={categoryModel.Name}");
+
+            if (categoryExists)
+            {
+                modelState.Add(categoryControlIdentifier, "Category already exists");
+                editContext.NotifyValidationStateChanged();
+            }
+        }
+
+        return categoryExists;
     }
 }
