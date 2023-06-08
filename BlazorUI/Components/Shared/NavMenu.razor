@@ -3,8 +3,10 @@
         <MudText Typo="Typo.h5" Color="Color.Dark" Class="drawer-heading">Shopping App</MudText>
     </MudDrawerHeader>
     <MudNavMenu>
-        <MudNavLink Href="/categories" Match="NavLinkMatch.All">Categories</MudNavLink>
-        <MudNavLink Href="/items" Match="NavLinkMatch.All">Items</MudNavLink>
+        <AuthorizeView Roles="Admin">
+            <MudNavLink Href="/categories" Match="NavLinkMatch.All">Categories</MudNavLink>
+            <MudNavLink Href="/items" Match="NavLinkMatch.All">Items</MudNavLink>
+        </AuthorizeView>
     </MudNavMenu>
 </MudDrawer>
 
