@@ -8,7 +8,5 @@ namespace DTO.Contracts.CategoryComponent;
 
 public class CategoryAddedEvent
 {
-    public int CategoryID { get; set; }
-
-    public string Name { get; set; } = String.Empty;
+    public bool ReloadTable { get; set; }
 }

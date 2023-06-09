@@ -8,5 +8,5 @@ namespace DTO.Contracts.CategoryComponent;
 
 public class CategoryDeletedEvent
 {
-    public int CategoryID { get; set; }
+    public bool ReloadTable { get; set; }
 }

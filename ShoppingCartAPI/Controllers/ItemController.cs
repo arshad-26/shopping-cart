@@ -40,9 +40,7 @@ public class ItemController : ControllerBase
         await _dbContext.Category.AddAsync(category);
         await _dbContext.SaveChangesAsync();
 
-        CategoryModel mappedCategory = _mapper.Map<CategoryModel>(category);
-
-        return Ok(mappedCategory);
+        return Ok();
     }
 
     [HttpDelete]
@@ -53,7 +51,7 @@ public class ItemController : ControllerBase
         _dbContext.Category.Remove(category!);
         await _dbContext.SaveChangesAsync();
 
-        return Ok(category!.CategoryID);
+        return Ok();
     }
 
     [HttpGet]

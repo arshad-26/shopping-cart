@@ -5,100 +5,104 @@
 @inject AuthInterceptor _authInterceptor
 @inject IDialogService _dialog
 @inject ComponentBus _bus
-@inject IMapper _mapper
 
-@if (isLoading)
-{
-    <div class="session-loading-spinner">
-        <MudProgressCircular Color="Color.Default" Indeterminate="true" />
-    </div>
-}
-else
-{
-    <article>
-        <MudTable Items="categoryList" FixedHeader="true" Hover="true" Filter="new Func<CategoryModel, bool>(FilterFunc1)">
-            <ToolBarContent>
-                <MudText Typo="Typo.h6">Manage Categories</MudText>
-                <MudSpacer />
-                <MudTextField @bind-Value="searchString1" Immediate="true" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-                <MudSpacer />
-                <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Tertiary" Size="Size.Medium" OnClick="@((e) => OpenAddDialog())" />
-            </ToolBarContent>
-            <ColGroup>
-                <col style="width:80%" />
-                <col style="width:20%" />
-            </ColGroup>
-            <HeaderContent>
-                <MudTh Class="table-heading">
-                    <MudTableSortLabel SortBy="new Func<CategoryModel, string>(x => x.Name)">Category</MudTableSortLabel>
-                </MudTh>
-                <MudTh>
-                    Actions
-                </MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd DataLabel="Category">@context.Name</MudTd>
-                <MudTd>
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Variant="Variant.Filled" Color="Color.Error" Size="Size.Small" OnClick="() => OpenDeleteDialog(context.CategoryID)"></MudIconButton>
-                </MudTd>
-            </RowTemplate>
-            <NoRecordsContent>
-                <MudText>No Records Found</MudText>
-            </NoRecordsContent>
-            <PagerContent>
-                <MudTablePager />
-            </PagerContent>
-        </MudTable>
-    </article>
-}
+<article>
+    <MudTable ServerData="@(new Func<TableState, Task<TableData<CategoryModel>>>(ServerReload))" FixedHeader="true" Hover="true" @ref="table">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Manage Categories</MudText>
+            <MudSpacer />
+            <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Immediate="true" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            <MudSpacer />
+            <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Tertiary" Size="Size.Medium" OnClick="@((e) => OpenAddDialog())" />
+        </ToolBarContent>
+        <ColGroup>
+            <col style="width:80%" />
+            <col style="width:20%" />
+        </ColGroup>
+        <HeaderContent>
+            <MudTh Class="table-heading">
+                <MudTableSortLabel SortLabel="category_field" T="CategoryModel">Category</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                Actions
+            </MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Category">@context.Name</MudTd>
+            <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Variant="Variant.Filled" Color="Color.Error" Size="Size.Small" OnClick="() => OpenDeleteDialog(context.CategoryID)"></MudIconButton>
+            </MudTd>
+        </RowTemplate>
+        <NoRecordsContent>
+            <MudText>No Records Found</MudText>
+        </NoRecordsContent>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>
+</article>
 
 @code {
-    private List<CategoryModel>? categoryList;
-    private string searchString1 = "";
-    private bool isLoading = true;
+    private IEnumerable<CategoryModel> pagedData;
+    private string searchString = "";
+    private int totalItems;
+    private MudTable<CategoryModel> table;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         _authInterceptor.RegisterEvent();
 
         _bus.Subscribe<CategoryAddedEvent>(CategoryAddedHandler);
         _bus.Subscribe<CategoryDeletedEvent>(CategoryDeletedHandler);
-
-        HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
-        categoryList = await httpClient.GetFromJsonAsync<List<CategoryModel>>("Item/GetCategories");
-
-        isLoading = false;
-        StateHasChanged();
     }
 
-    private bool FilterFunc1(CategoryModel category) => FilterFunc(category, searchString1);
-
-    private bool FilterFunc(CategoryModel category, string searchString)
+    private async Task<TableData<CategoryModel>> ServerReload(TableState state)
     {
-        if (String.IsNullOrWhiteSpace(searchString))
-            return true;
+        HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
+        IEnumerable<CategoryModel>? data = await httpClient.GetFromJsonAsync<List<CategoryModel>>("Item/GetCategories");
 
-        if (category.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
+        data = data!.Where(element =>
+        {
+            if (String.IsNullOrWhiteSpace(searchString))
+                return true;
 
-        return false;
+            if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            return false;
+        }).ToArray();
+
+        totalItems = data.Count();
+
+        if (state.SortLabel == "category_field")
+        {
+            data = data.OrderByDirection(state.SortDirection, x => x.Name);
+        }
+
+        pagedData = data.Skip(state.Page * state.PageSize).Take(state.PageSize).ToArray();
+        return new TableData<CategoryModel>() { TotalItems = totalItems, Items = pagedData };
+    }
+
+    private void OnSearch(string text)
+    {
+        searchString = text;
+        table.ReloadServerData();
     }
 
     private void CategoryAddedHandler(MessageArgs args)
     {
         CategoryAddedEvent categoryAddedEvent = args.GetMessage<CategoryAddedEvent>();
-        CategoryModel newCategory = _mapper.Map<CategoryModel>(categoryAddedEvent);
 
-        categoryList!.Add(newCategory);
-        StateHasChanged();
+        if(categoryAddedEvent.ReloadTable)
+            table.ReloadServerData();
     }
 
     private void CategoryDeletedHandler(MessageArgs args)
     {
         CategoryDeletedEvent categoryDeletedEvent = args.GetMessage<CategoryDeletedEvent>();
 
-        categoryList!.RemoveAll(x => x.CategoryID == categoryDeletedEvent.CategoryID);
-        StateHasChanged();
+        if(categoryDeletedEvent.ReloadTable)
+            table.ReloadServerData();
     }
 
     private void OpenAddDialog() => _dialog.Show<Category>("Add Category");
