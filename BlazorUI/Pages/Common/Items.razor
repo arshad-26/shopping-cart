@@ -1,0 +1,137 @@
+﻿@page "/items"
+@implements IDisposable
+@attribute [Authorize(Roles = "Admin")]
+@inject IDialogService _dialog
+@inject AuthInterceptor _authInterceptor
+@inject IHttpClientFactory _clientFactory
+
+<article>
+    <MudTable ServerData="@(new Func<TableState, Task<TableData<ItemModel>>>(ServerReload))" FixedHeader="true" Hover="true" @ref="table">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Manage Items</MudText>
+            <MudSpacer />
+            <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Immediate="true" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            <MudSpacer />
+            <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Tertiary" Size="Size.Medium" OnClick="@((e) => OpenAddDialog())" />
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh Class="table-heading">
+                <MudTableSortLabel SortLabel="name_field" T="ItemModel">Name</MudTableSortLabel>
+            </MudTh>
+            <MudTh Class="table-heading">
+                <MudTableSortLabel SortLabel="price_field" T="ItemModel">Price</MudTableSortLabel>
+            </MudTh>
+            <MudTh Class="table-heading">
+                <MudTableSortLabel SortLabel="category_field" T="ItemModel">Category</MudTableSortLabel>
+            </MudTh>
+            <MudTh Class="table-heading">Image</MudTh>
+            <MudTh Class="table-heading">Actions</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.Name</MudTd>
+            <MudTd>@context.Price</MudTd>
+            <MudTd>@context.Category</MudTd>
+            <MudTd>
+                <img src="@($"data:image/jpeg;base64,{@context.Base64Img}")" />
+            </MudTd>
+            <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Color="Color.Warning" Size="Size.Small" OnClick="() => OpenEditDialog(context.ID)"></MudIconButton>
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Variant="Variant.Filled" Color="Color.Error" Size="Size.Small" OnClick="() => OpenDeleteDialog(context.ID)"></MudIconButton>
+            </MudTd>
+        </RowTemplate>
+        <NoRecordsContent>
+            <MudText>No Records Found</MudText>
+        </NoRecordsContent>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>
+</article>
+
+@code {
+    private IEnumerable<ItemModel> pagedData;
+    private string searchString = "";
+    private int totalItems;
+    private MudTable<ItemModel> table;
+
+    protected override void OnInitialized()
+    {
+        _authInterceptor.RegisterEvent();
+    }
+
+    private async Task<TableData<ItemModel>> ServerReload(TableState state)
+    {
+        HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
+        IEnumerable<ItemModel>? data = await httpClient.GetFromJsonAsync<List<ItemModel>>("Item/GetItems");
+
+        data = data!.Where(element =>
+        {
+            if (String.IsNullOrWhiteSpace(searchString))
+                return true;
+
+            if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if (element.Price.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if (element.Category.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if ($"{element.Name} {element.Price} {element.Category}".Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            return false;
+        }).ToArray();
+
+        totalItems = data.Count();
+
+        data = state.SortLabel switch
+        {
+            "name_field" => data.OrderByDirection(state.SortDirection, x => x.Name),
+            "price_field" => data.OrderByDirection(state.SortDirection, x => x.Price),
+            "category_field" => data.OrderByDirection(state.SortDirection, x => x.Category),
+            _ => data
+        };
+
+        pagedData = data.Skip(state.Page * state.PageSize).Take(state.PageSize).ToArray();
+        return new TableData<ItemModel>() { TotalItems = totalItems, Items = pagedData };
+    }
+
+    private void OnSearch(string text)
+    {
+        searchString = text;
+        table.ReloadServerData();
+    }
+
+    private void OpenAddDialog() => _dialog.Show<Category>("Add Category");
+
+    private void OpenEditDialog(long ID)
+    {
+        DialogParameters parameters = new();
+
+        parameters.Add("ContentText", "Are you sure you want to delete this record?");
+        parameters.Add("CategoryID", ID);
+
+        DialogOptions options = new() { MaxWidth = MaxWidth.ExtraSmall, Position = DialogPosition.Center };
+
+        _dialog.Show<DeleteDialog>("Delete", parameters, options);
+    }
+
+    private void OpenDeleteDialog(long ID)
+    {
+        DialogParameters parameters = new();
+
+        parameters.Add("ContentText", "Are you sure you want to delete this record?");
+        parameters.Add("CategoryID", ID);
+
+        DialogOptions options = new() { MaxWidth = MaxWidth.ExtraSmall, Position = DialogPosition.Center };
+
+        _dialog.Show<DeleteDialog>("Delete", parameters, options);
+    }
+
+    public void Dispose()
+    {
+        _authInterceptor.DisposeEvent();
+    }
+}

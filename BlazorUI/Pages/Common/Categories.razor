@@ -7,7 +7,7 @@
 @inject ComponentBus _bus
 
 <article>
-    <MudTable ServerData="@(new Func<TableState, Task<TableData<CategoryModel>>>(ServerReload))" FixedHeader="true" Hover="true" @ref="table">
+    <MudTable ServerData="@(new Func<TableState, Task<TableData<CategoryModel>>>(ServerReload))" FixedHeader="true" Hover="true" Dense="true" @ref="table">
         <ToolBarContent>
             <MudText Typo="Typo.h6">Manage Categories</MudText>
             <MudSpacer />
@@ -23,12 +23,10 @@
             <MudTh Class="table-heading">
                 <MudTableSortLabel SortLabel="category_field" T="CategoryModel">Category</MudTableSortLabel>
             </MudTh>
-            <MudTh>
-                Actions
-            </MudTh>
+            <MudTh Class="table-heading">Actions</MudTh>
         </HeaderContent>
         <RowTemplate>
-            <MudTd DataLabel="Category">@context.Name</MudTd>
+            <MudTd>@context.Name</MudTd>
             <MudTd>
                 <MudIconButton Icon="@Icons.Material.Filled.Delete" Variant="Variant.Filled" Color="Color.Error" Size="Size.Small" OnClick="() => OpenDeleteDialog(context.CategoryID)"></MudIconButton>
             </MudTd>

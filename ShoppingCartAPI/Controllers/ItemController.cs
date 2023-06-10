@@ -32,6 +32,23 @@ public class ItemController : ControllerBase
         return Ok(categories);
     }
 
+    [HttpGet]
+    public IActionResult GetItems()
+    {
+        IEnumerable<ItemModel> items = _dbContext.Item.Include(x => x.Category).AsEnumerable().Select(x =>
+        {
+            ItemModel item = _mapper.Map<ItemModel>(x);
+            item.Category = x.Category.Name;
+
+            byte[] fileArr = System.IO.File.ReadAllBytes(x.ImagePath);
+            item.Base64Img = Convert.ToBase64String(fileArr);
+
+            return item;
+        });
+
+        return Ok(items);
+    }
+
     [HttpPost]
     public async Task<IActionResult> AddCategory(CategoryModel categoryModel)
     {
