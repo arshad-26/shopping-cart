@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace ShoppingCartAPI.Controllers;
 
@@ -55,6 +57,40 @@ public class ItemController : ControllerBase
         Category category = _mapper.Map<Category>(categoryModel);
         
         await _dbContext.Category.AddAsync(category);
+        await _dbContext.SaveChangesAsync();
+
+        return Ok();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> AddItem([FromForm] ItemModel itemModel)
+    {
+        Category categoryDb = (await _dbContext.Category.FirstOrDefaultAsync(x => x.CategoryID == itemModel.CategoryID))!;
+        string category = categoryDb.Name;
+
+        string categoryPath = Path.GetFullPath("ItemImages") + "\\" + category;
+
+        if(!Directory.Exists(categoryPath))
+            Directory.CreateDirectory(categoryPath);
+
+        string fileExtension = Path.GetExtension(itemModel.UploadedFile!.FileName);
+        string fileName = Guid.NewGuid().ToString() + fileExtension;
+        string filePath = Path.GetFullPath(categoryPath + "\\" + fileName);
+
+        using MemoryStream stream = new ();
+        await itemModel.UploadedFile!.CopyToAsync(stream);
+        using Image img = Image.FromStream(stream);
+        img.Save(filePath);
+
+        Item item = new ()
+        {
+            Name = itemModel.Name,
+            Price = itemModel.Price,
+            Category = categoryDb,
+            ImagePath = category + "\\" + fileName
+        };
+
+        await _dbContext.Item.AddAsync(item);
         await _dbContext.SaveChangesAsync();
 
         return Ok();

@@ -12,7 +12,7 @@
             <MudSpacer />
             <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Immediate="true" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
             <MudSpacer />
-            <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Tertiary" Size="Size.Medium" OnClick="@((e) => OpenAddDialog())" />
+            <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Tertiary" Size="Size.Medium" OnClick="@(async (e) => await OpenAddDialog())" />
         </ToolBarContent>
         <HeaderContent>
             <MudTh Class="table-heading">
@@ -104,7 +104,15 @@
         table.ReloadServerData();
     }
 
-    private void OpenAddDialog() => _dialog.Show<Category>("Add Category");
+    private async Task OpenAddDialog() {
+        HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
+        List<CategoryModel>? categories = await httpClient.GetFromJsonAsync<List<CategoryModel>>("Item/GetCategories");
+
+        DialogParameters parameters = new();
+        parameters.Add("Categories", categories);
+
+        _dialog.Show<Item>("Add Item", parameters);
+    }
 
     private void OpenEditDialog(long ID)
     {

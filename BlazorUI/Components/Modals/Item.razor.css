@@ -1,0 +1,8 @@
+::deep .mud-input-control:not(:first-child){
+    margin-top:1em !important;
+}
+
+::deep .submit-btn{
+    display:block;
+    margin:2em auto 0 auto;
+}

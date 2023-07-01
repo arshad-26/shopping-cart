@@ -1,0 +1,95 @@
+﻿@inject IHttpClientFactory _clientFactory
+@inject ISnackbar _snackBar
+
+<MudDialog>
+    <DialogContent>
+        <article>
+            <EditForm EditContext="editContext" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <MudTextField Label="Name" @bind-Value="itemModel.Name" For="(() => itemModel.Name)" />
+                <MudNumericField Label="Price" @bind-Value="itemModel.Price" Min="0" Class="margin-field" />
+                <MudSelect T="int?" @bind-Value="itemModel.CategoryID" Label="Category" AnchorOrigin="Origin.BottomCenter" Dense="true" Class="margin-field">
+                    @foreach (CategoryModel category in Categories)
+                    {
+                        <MudSelectItem T="int?" Value="category.CategoryID">@category.Name</MudSelectItem>
+                    }
+                </MudSelect>
+                <MudFileUpload T="IBrowserFile" For="(() => itemModel.File)" @bind-Files="itemModel.File" Accept="image/*">
+                    <ButtonTemplate Context="editContext">
+                        <MudButton HtmlTag="label"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Secondary"
+                                   StartIcon="@Icons.Material.Filled.Image"
+                                   for="@editContext">
+                            Load Picture
+                        </MudButton>
+                    </ButtonTemplate>
+                </MudFileUpload>
+                @if(itemModel.File is not null)
+                {
+                    <MudList>
+                        <MudListItem Icon="@Icons.Material.Filled.AttachFile" @key="itemModel.File">
+                            @itemModel.File.Name
+                        </MudListItem>
+                    </MudList>
+                }
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="submit-btn">Submit</MudButton>
+            </EditForm>
+        </article>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    private ItemModel itemModel = new();
+    private EditContext? editContext;
+    private ValidationMessageStore? modelState;
+
+    [Parameter]
+    public List<CategoryModel> Categories { get; set; } = new();
+
+    [CascadingParameter]
+    public MudDialogInstance MudDialog { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        editContext = new(itemModel);
+        modelState = new(editContext);
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        MudDialog.Close(DialogResult.Ok(true));
+
+        using MultipartFormDataContent content = new();
+        StreamContent fileContent = new(itemModel.File!.OpenReadStream());
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue(itemModel.File!.ContentType);
+        content.Add(fileContent, "\"UploadedFile\"", itemModel.File!.Name);
+        AddModelData(content, itemModel);
+
+        HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
+        HttpResponseMessage response = await httpClient.PostAsync("Item/AddItem", content);
+
+        if (response.IsSuccessStatusCode)
+        {
+            _snackBar.Add("Item has been added successfully", Severity.Success);
+        }
+        else
+        {
+            _snackBar.Add("An unexpected error occured", Severity.Error);
+        }
+    }
+
+    private void AddModelData(MultipartFormDataContent formContent, ItemModel model)
+    {
+        Type modelType = model.GetType();
+        IEnumerable<PropertyInfo> properties = modelType.GetProperties().Where(x => x.Name != "File" && x.Name != "UploadedFile");
+
+        foreach(PropertyInfo property in properties)
+        {
+            object value = property.GetValue(model)!;
+            StringContent content = new(value.ToString()!);
+
+            formContent.Add(content, property.Name);
+        }
+    }
+}
