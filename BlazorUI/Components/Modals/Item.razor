@@ -1,14 +1,15 @@
 ﻿@inject IHttpClientFactory _clientFactory
 @inject ISnackbar _snackBar
+@inject ComponentBus _bus
 
 <MudDialog>
     <DialogContent>
         <article>
-            <EditForm EditContext="editContext" OnValidSubmit="HandleValidSubmit">
+            <EditForm Model="itemModel" OnValidSubmit="HandleValidSubmit">
                 <DataAnnotationsValidator />
                 <MudTextField Label="Name" @bind-Value="itemModel.Name" For="(() => itemModel.Name)" />
-                <MudNumericField Label="Price" @bind-Value="itemModel.Price" Min="0" Class="margin-field" />
-                <MudSelect T="int?" @bind-Value="itemModel.CategoryID" Label="Category" AnchorOrigin="Origin.BottomCenter" Dense="true" Class="margin-field">
+                <MudNumericField Label="Price" @bind-Value="itemModel.Price" For="(() => itemModel.Price)" Class="margin-field" />
+                <MudSelect T="int?" @bind-Value="itemModel.CategoryID" For="(() => itemModel.CategoryID)" Label="Category" AnchorOrigin="Origin.BottomCenter" Dense="true" Class="margin-field">
                     @foreach (CategoryModel category in Categories)
                     {
                         <MudSelectItem T="int?" Value="category.CategoryID">@category.Name</MudSelectItem>
@@ -41,20 +42,12 @@
 
 @code {
     private ItemModel itemModel = new();
-    private EditContext? editContext;
-    private ValidationMessageStore? modelState;
-
+    
     [Parameter]
     public List<CategoryModel> Categories { get; set; } = new();
 
     [CascadingParameter]
     public MudDialogInstance MudDialog { get; set; } = new();
-
-    protected override void OnInitialized()
-    {
-        editContext = new(itemModel);
-        modelState = new(editContext);
-    }
 
     private async Task HandleValidSubmit()
     {
@@ -71,6 +64,9 @@
 
         if (response.IsSuccessStatusCode)
         {
+            ItemAddedEvent itemAddedEvent = new() { ReloadTable = true };
+            await _bus.Publish(itemAddedEvent);
+
             _snackBar.Add("Item has been added successfully", Severity.Success);
         }
         else

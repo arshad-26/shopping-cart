@@ -42,7 +42,10 @@ public class ItemController : ControllerBase
             ItemModel item = _mapper.Map<ItemModel>(x);
             item.Category = x.Category.Name;
 
-            byte[] fileArr = System.IO.File.ReadAllBytes(x.ImagePath);
+            Image itemImg = Image.FromFile(Path.GetFullPath("ItemImages") + "\\" + x.ImagePath);
+            Image thumbnail = itemImg.GetThumbnailImage(120, 120, () => false, IntPtr.Zero);
+            
+            byte[] fileArr = (byte[])new ImageConverter().ConvertTo(thumbnail, typeof(byte[]))!;
             item.Base64Img = Convert.ToBase64String(fileArr);
 
             return item;
@@ -109,5 +112,4 @@ public class ItemController : ControllerBase
 
     [HttpGet]
     public async Task<bool> CategoryExists(string category) => await _dbContext.Category.AnyAsync(x => x.Name == category);
-    
 }

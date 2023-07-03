@@ -4,6 +4,7 @@
 @inject IDialogService _dialog
 @inject AuthInterceptor _authInterceptor
 @inject IHttpClientFactory _clientFactory
+@inject ComponentBus _bus
 
 <article>
     <MudTable ServerData="@(new Func<TableState, Task<TableData<ItemModel>>>(ServerReload))" FixedHeader="true" Hover="true" @ref="table">
@@ -57,6 +58,8 @@
     protected override void OnInitialized()
     {
         _authInterceptor.RegisterEvent();
+
+        _bus.Subscribe<ItemAddedEvent>(ItemAddedHandler);
     }
 
     private async Task<TableData<ItemModel>> ServerReload(TableState state)
@@ -104,6 +107,14 @@
         table.ReloadServerData();
     }
 
+    private void ItemAddedHandler(MessageArgs args)
+    {
+        ItemAddedEvent itemAddedEvent = args.GetMessage<ItemAddedEvent>();
+
+        if (itemAddedEvent.ReloadTable)
+            table.ReloadServerData();
+    }
+
     private async Task OpenAddDialog() {
         HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
         List<CategoryModel>? categories = await httpClient.GetFromJsonAsync<List<CategoryModel>>("Item/GetCategories");
@@ -141,5 +152,7 @@
     public void Dispose()
     {
         _authInterceptor.DisposeEvent();
+
+        _bus.UnSubscribe<ItemAddedEvent>(ItemAddedHandler);
     }
 }
