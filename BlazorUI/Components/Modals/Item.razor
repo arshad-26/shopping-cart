@@ -5,7 +5,7 @@
 <MudDialog>
     <DialogContent>
         <article>
-            <EditForm Model="itemModel" OnValidSubmit="HandleValidSubmit">
+            <EditForm EditContext="editContext" OnValidSubmit="HandleValidSubmit">
                 <DataAnnotationsValidator />
                 <MudTextField Label="Name" @bind-Value="itemModel.Name" For="(() => itemModel.Name)" />
                 <MudNumericField Label="Price" @bind-Value="itemModel.Price" For="(() => itemModel.Price)" Class="margin-field" />
@@ -42,12 +42,20 @@
 
 @code {
     private ItemModel itemModel = new();
-    
+    private EditContext? editContext;
+    private ValidationMessageStore? modelState;
+
     [Parameter]
     public List<CategoryModel> Categories { get; set; } = new();
 
     [CascadingParameter]
     public MudDialogInstance MudDialog { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        editContext = new(itemModel);
+        modelState = new(editContext);
+    }
 
     private async Task HandleValidSubmit()
     {
@@ -77,8 +85,10 @@
 
     private void AddModelData(MultipartFormDataContent formContent, ItemModel model)
     {
+        string[] toBeExcludedProps = new string[] { "ID", "Category", "File", "Base64Img" };
+
         Type modelType = model.GetType();
-        IEnumerable<PropertyInfo> properties = modelType.GetProperties().Where(x => x.Name != "File" && x.Name != "UploadedFile");
+        IEnumerable<PropertyInfo> properties = modelType.GetProperties().Where(x => !toBeExcludedProps.Contains(x.Name));
 
         foreach(PropertyInfo property in properties)
         {

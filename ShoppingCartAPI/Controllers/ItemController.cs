@@ -66,7 +66,7 @@ public class ItemController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddItem([FromForm] ItemModel itemModel)
+    public async Task<IActionResult> AddItem([FromForm] ItemAPIModel itemModel)
     {
         Category categoryDb = (await _dbContext.Category.FirstOrDefaultAsync(x => x.CategoryID == itemModel.CategoryID))!;
         string category = categoryDb.Name;
