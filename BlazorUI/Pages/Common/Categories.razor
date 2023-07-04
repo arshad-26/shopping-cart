@@ -111,10 +111,10 @@
 
         parameters.Add("ContentText", "Are you sure you want to delete this record?");
         parameters.Add("CategoryID", categoryID);
-
+        
         DialogOptions options = new() { MaxWidth = MaxWidth.ExtraSmall, Position = DialogPosition.Center };
 
-        _dialog.Show<DeleteDialog>("Delete", parameters, options);
+        _dialog.Show<DeleteCategoryDialog>("Delete", parameters, options);
     }
 
     public void Dispose()

@@ -42,12 +42,14 @@ public class ItemController : ControllerBase
             ItemModel item = _mapper.Map<ItemModel>(x);
             item.Category = x.Category.Name;
 
-            Image itemImg = Image.FromFile(Path.GetFullPath("ItemImages") + "\\" + x.ImagePath);
-            Image thumbnail = itemImg.GetThumbnailImage(120, 120, () => false, IntPtr.Zero);
-            
-            byte[] fileArr = (byte[])new ImageConverter().ConvertTo(thumbnail, typeof(byte[]))!;
-            item.Base64Img = Convert.ToBase64String(fileArr);
+            {
+                using Image itemImg = Image.FromFile(Path.GetFullPath("ItemImages") + "\\" + x.ImagePath);
+                using Image thumbnail = itemImg.GetThumbnailImage(120, 120, () => false, IntPtr.Zero);
 
+                byte[] fileArr = (byte[])new ImageConverter().ConvertTo(thumbnail, typeof(byte[]))!;
+                item.Base64Img = Convert.ToBase64String(fileArr);
+            }
+            
             return item;
         });
 
@@ -80,10 +82,12 @@ public class ItemController : ControllerBase
         string fileName = Guid.NewGuid().ToString() + fileExtension;
         string filePath = Path.GetFullPath(categoryPath + "\\" + fileName);
 
-        using MemoryStream stream = new ();
-        await itemModel.UploadedFile!.CopyToAsync(stream);
-        using Image img = Image.FromStream(stream);
-        img.Save(filePath);
+        {
+            using MemoryStream stream = new();
+            await itemModel.UploadedFile!.CopyToAsync(stream);
+            using Image img = Image.FromStream(stream);
+            img.Save(filePath);
+        }
 
         Item item = new ()
         {
@@ -105,6 +109,20 @@ public class ItemController : ControllerBase
         Category? category = await _dbContext.Category.FirstOrDefaultAsync(x => x.CategoryID == categoryID);
 
         _dbContext.Category.Remove(category!);
+        await _dbContext.SaveChangesAsync();
+
+        return Ok();
+    }
+
+    [HttpDelete]
+    public async Task<IActionResult> DeleteItem(long ID)
+    {
+        Item selectedItem = (await _dbContext.Item.FirstOrDefaultAsync(x => x.ID == ID))!;
+        string relativeImgPath = selectedItem.ImagePath;
+
+        System.IO.File.Delete(Path.GetFullPath("ItemImages") + "\\" + relativeImgPath);
+
+        _dbContext.Item.Remove(selectedItem);
         await _dbContext.SaveChangesAsync();
 
         return Ok();

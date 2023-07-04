@@ -7,7 +7,7 @@
 @inject ComponentBus _bus
 
 <article>
-    <MudTable ServerData="@(new Func<TableState, Task<TableData<ItemModel>>>(ServerReload))" FixedHeader="true" Hover="true" @ref="table">
+    <MudTable ServerData="@(new Func<TableState, Task<TableData<ItemModel>>>(ServerReload))" FixedHeader="true" Hover="true" Dense="true" @ref="table">
         <ToolBarContent>
             <MudText Typo="Typo.h6">Manage Items</MudText>
             <MudSpacer />
@@ -60,6 +60,7 @@
         _authInterceptor.RegisterEvent();
 
         _bus.Subscribe<ItemAddedEvent>(ItemAddedHandler);
+        _bus.Subscribe<ItemDeletedEvent>(ItemDeletedHandler);
     }
 
     private async Task<TableData<ItemModel>> ServerReload(TableState state)
@@ -115,6 +116,14 @@
             table.ReloadServerData();
     }
 
+    private void ItemDeletedHandler(MessageArgs args)
+    {
+        ItemDeletedEvent itemDeletedEvent = args.GetMessage<ItemDeletedEvent>();
+        
+        if (itemDeletedEvent.ReloadTable)
+            table.ReloadServerData();
+    }
+
     private async Task OpenAddDialog() {
         HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
         List<CategoryModel>? categories = await httpClient.GetFromJsonAsync<List<CategoryModel>>("Item/GetCategories");
@@ -134,7 +143,7 @@
 
         DialogOptions options = new() { MaxWidth = MaxWidth.ExtraSmall, Position = DialogPosition.Center };
 
-        _dialog.Show<DeleteDialog>("Delete", parameters, options);
+        _dialog.Show<DeleteItemDialog>("Delete", parameters, options);
     }
 
     private void OpenDeleteDialog(long ID)
@@ -142,11 +151,11 @@
         DialogParameters parameters = new();
 
         parameters.Add("ContentText", "Are you sure you want to delete this record?");
-        parameters.Add("CategoryID", ID);
-
+        parameters.Add("ItemID", ID);
+        
         DialogOptions options = new() { MaxWidth = MaxWidth.ExtraSmall, Position = DialogPosition.Center };
 
-        _dialog.Show<DeleteDialog>("Delete", parameters, options);
+        _dialog.Show<DeleteItemDialog>("Delete", parameters, options);
     }
 
     public void Dispose()
@@ -154,5 +163,6 @@
         _authInterceptor.DisposeEvent();
 
         _bus.UnSubscribe<ItemAddedEvent>(ItemAddedHandler);
+        _bus.UnSubscribe<ItemDeletedEvent>(ItemDeletedHandler);
     }
 }
