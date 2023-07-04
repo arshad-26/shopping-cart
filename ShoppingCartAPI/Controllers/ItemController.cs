@@ -73,31 +73,51 @@ public class ItemController : ControllerBase
         Category categoryDb = (await _dbContext.Category.FirstOrDefaultAsync(x => x.CategoryID == itemModel.CategoryID))!;
         string category = categoryDb.Name;
 
-        string categoryPath = Path.GetFullPath("ItemImages") + "\\" + category;
-
-        if(!Directory.Exists(categoryPath))
-            Directory.CreateDirectory(categoryPath);
-
-        string fileExtension = Path.GetExtension(itemModel.UploadedFile!.FileName);
-        string fileName = Guid.NewGuid().ToString() + fileExtension;
-        string filePath = Path.GetFullPath(categoryPath + "\\" + fileName);
-
-        {
-            using MemoryStream stream = new();
-            await itemModel.UploadedFile!.CopyToAsync(stream);
-            using Image img = Image.FromStream(stream);
-            img.Save(filePath);
-        }
-
-        Item item = new ()
+        Item item = new()
         {
             Name = itemModel.Name,
             Price = itemModel.Price,
-            Category = categoryDb,
-            ImagePath = category + "\\" + fileName
+            Category = categoryDb
         };
 
+        await SaveFileAsync(category, itemModel.UploadedFile!, item);
+
         await _dbContext.Item.AddAsync(item);
+        await _dbContext.SaveChangesAsync();
+
+        return Ok();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> EditItem(long ID)
+    {
+        Item item = (await _dbContext.Item.FirstOrDefaultAsync(x => x.ID == ID))!;
+        ItemModel itemModel = _mapper.Map<ItemModel>(item);
+
+        {
+            using Image itemImg = Image.FromFile(Path.GetFullPath("ItemImages") + "\\" + item.ImagePath);
+            using Image thumbnail = itemImg.GetThumbnailImage(120, 120, () => false, IntPtr.Zero);
+
+            byte[] fileArr = (byte[])new ImageConverter().ConvertTo(thumbnail, typeof(byte[]))!;
+            itemModel.Base64Img = Convert.ToBase64String(fileArr);
+        }
+
+        return Ok(itemModel);
+    }
+
+    [HttpPut]
+    public async Task<IActionResult> EditItem([FromForm] ItemAPIModel itemModel)
+    {
+        Item item = (await _dbContext.Item.FirstOrDefaultAsync(x => x.ID == itemModel.ID))!;
+        Category category = (await _dbContext.Category.FirstOrDefaultAsync(x => x.CategoryID == itemModel.CategoryID))!;
+
+        item.Name = itemModel.Name;
+        item.Price = itemModel.Price;
+        item.Category = category;
+
+        System.IO.File.Delete(Path.GetFullPath("ItemImages") + "\\" + item.ImagePath);
+        await SaveFileAsync(category.Name, itemModel.UploadedFile!, item);
+
         await _dbContext.SaveChangesAsync();
 
         return Ok();
@@ -130,4 +150,25 @@ public class ItemController : ControllerBase
 
     [HttpGet]
     public async Task<bool> CategoryExists(string category) => await _dbContext.Category.AnyAsync(x => x.Name == category);
+
+    private async Task SaveFileAsync(string categoryName, IFormFile uploadFile, Item itemEntity)
+    {
+        string categoryPath = Path.GetFullPath("ItemImages") + "\\" + categoryName;
+
+        if (!Directory.Exists(categoryPath))
+            Directory.CreateDirectory(categoryPath);
+
+        string fileExtension = Path.GetExtension(uploadFile.FileName);
+        string fileName = Guid.NewGuid().ToString() + fileExtension;
+        string filePath = Path.GetFullPath(categoryPath + "\\" + fileName);
+
+        {
+            using MemoryStream stream = new();
+            await uploadFile.CopyToAsync(stream);
+            using Image img = Image.FromStream(stream);
+            img.Save(filePath);
+        }
+
+        itemEntity.ImagePath = categoryName + "\\" + fileName;
+    }
 }

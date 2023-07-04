@@ -61,6 +61,7 @@
 
         _bus.Subscribe<ItemAddedEvent>(ItemAddedHandler);
         _bus.Subscribe<ItemDeletedEvent>(ItemDeletedHandler);
+        _bus.Subscribe<ItemEditEvent>(ItemEditHandler);
     }
 
     private async Task<TableData<ItemModel>> ServerReload(TableState state)
@@ -116,10 +117,18 @@
             table.ReloadServerData();
     }
 
+    private void ItemEditHandler(MessageArgs args)
+    {
+        ItemEditEvent itemEditEvent = args.GetMessage<ItemEditEvent>();
+
+        if (itemEditEvent.ReloadTable)
+            table.ReloadServerData();
+    }
+
     private void ItemDeletedHandler(MessageArgs args)
     {
         ItemDeletedEvent itemDeletedEvent = args.GetMessage<ItemDeletedEvent>();
-        
+
         if (itemDeletedEvent.ReloadTable)
             table.ReloadServerData();
     }
@@ -134,16 +143,19 @@
         _dialog.Show<Item>("Add Item", parameters);
     }
 
-    private void OpenEditDialog(long ID)
+    private async Task OpenEditDialog(long ID)
     {
         DialogParameters parameters = new();
 
-        parameters.Add("ContentText", "Are you sure you want to delete this record?");
-        parameters.Add("CategoryID", ID);
+        HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
+        List<CategoryModel>? categories = await httpClient.GetFromJsonAsync<List<CategoryModel>>("Item/GetCategories");
+        ItemModel selectedItem = (await httpClient.GetFromJsonAsync<ItemModel>($"Item/EditItem?ID={ID}"))!;
 
-        DialogOptions options = new() { MaxWidth = MaxWidth.ExtraSmall, Position = DialogPosition.Center };
+        parameters.Add("Categories", categories);
+        parameters.Add("EditItemModel", selectedItem);
+        parameters.Add("IsEdit", true);
 
-        _dialog.Show<DeleteItemDialog>("Delete", parameters, options);
+        _dialog.Show<Item>("Edit Item", parameters);
     }
 
     private void OpenDeleteDialog(long ID)
@@ -164,5 +176,6 @@
 
         _bus.UnSubscribe<ItemAddedEvent>(ItemAddedHandler);
         _bus.UnSubscribe<ItemDeletedEvent>(ItemDeletedHandler);
+        _bus.UnSubscribe<ItemEditEvent>(ItemEditHandler);
     }
 }

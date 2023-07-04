@@ -10,6 +10,8 @@ namespace DTO.Common;
 
 public class ItemAPIModel
 {
+    public long ID { get; set; }
+    
     [Required(ErrorMessage = "This field is required")]
     public string Name { get; set; } = String.Empty;
 

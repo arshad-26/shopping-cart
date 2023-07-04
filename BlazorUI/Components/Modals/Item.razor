@@ -7,6 +7,7 @@
         <article>
             <EditForm EditContext="editContext" OnValidSubmit="HandleValidSubmit">
                 <DataAnnotationsValidator />
+                <MudTextField Class="d-none" Value="itemModel.ID" ReadOnly="true" />
                 <MudTextField Label="Name" @bind-Value="itemModel.Name" For="(() => itemModel.Name)" />
                 <MudNumericField Label="Price" @bind-Value="itemModel.Price" For="(() => itemModel.Price)" Class="margin-field" />
                 <MudSelect T="int?" @bind-Value="itemModel.CategoryID" For="(() => itemModel.CategoryID)" Label="Category" AnchorOrigin="Origin.BottomCenter" Dense="true" Class="margin-field">
@@ -48,6 +49,16 @@
     [Parameter]
     public List<CategoryModel> Categories { get; set; } = new();
 
+    [Parameter]
+    public ItemModel EditItemModel
+    {
+        get => itemModel;
+        set => itemModel = value;
+    }
+
+    [Parameter]
+    public bool IsEdit { get; set; }
+
     [CascadingParameter]
     public MudDialogInstance MudDialog { get; set; } = new();
 
@@ -67,25 +78,45 @@
         content.Add(fileContent, "\"UploadedFile\"", itemModel.File!.Name);
         AddModelData(content, itemModel);
 
-        HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
-        HttpResponseMessage response = await httpClient.PostAsync("Item/AddItem", content);
-
-        if (response.IsSuccessStatusCode)
+        if (IsEdit)
         {
-            ItemAddedEvent itemAddedEvent = new() { ReloadTable = true };
-            await _bus.Publish(itemAddedEvent);
+            HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
+            HttpResponseMessage response = await httpClient.PutAsync("Item/EditItem", content);
 
-            _snackBar.Add("Item has been added successfully", Severity.Success);
+            if (response.IsSuccessStatusCode)
+            {
+                ItemEditEvent itemEditEvent = new() { ReloadTable = true };
+                await _bus.Publish(itemEditEvent);
+
+                _snackBar.Add("Item has been updated successfully", Severity.Success);
+            }
+            else
+            {
+                _snackBar.Add("An unexpected error occured", Severity.Error);
+            }
         }
         else
         {
-            _snackBar.Add("An unexpected error occured", Severity.Error);
+            HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
+            HttpResponseMessage response = await httpClient.PostAsync("Item/AddItem", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                ItemAddedEvent itemAddedEvent = new() { ReloadTable = true };
+                await _bus.Publish(itemAddedEvent);
+
+                _snackBar.Add("Item has been added successfully", Severity.Success);
+            }
+            else
+            {
+                _snackBar.Add("An unexpected error occured", Severity.Error);
+            }
         }
     }
 
     private void AddModelData(MultipartFormDataContent formContent, ItemModel model)
     {
-        string[] toBeExcludedProps = new string[] { "ID", "Category", "File", "Base64Img" };
+        string[] toBeExcludedProps = new string[] { "Category", "File", "Base64Img" };
 
         Type modelType = model.GetType();
         IEnumerable<PropertyInfo> properties = modelType.GetProperties().Where(x => !toBeExcludedProps.Contains(x.Name));
