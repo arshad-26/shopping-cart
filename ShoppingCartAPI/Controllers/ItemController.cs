@@ -28,8 +28,16 @@ public class ItemController : ControllerBase
     [HttpGet]
     public IActionResult GetCategories()
     {
-        List<Category> categoriesDb = _dbContext.Category.ToList();
-        List<CategoryModel> categories = _mapper.Map<List<CategoryModel>>(categoriesDb);
+        List<Category> categoriesDb = _dbContext.Category.Include(x => x.Items).ToList();
+        List<CategoryModel> categories = new ();
+
+        categoriesDb.ForEach(entity =>
+        {
+            CategoryModel category = _mapper.Map<CategoryModel>(entity);
+            category.CanBeDeleted = entity.Items == null || entity.Items.Count == 0;
+
+            categories.Add(category);
+        });
 
         return Ok(categories);
     }

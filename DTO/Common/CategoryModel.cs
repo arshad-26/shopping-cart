@@ -13,4 +13,6 @@ public class CategoryModel
 
     [Required(ErrorMessage = "This field is required")]
     public string Name { get; set; } = String.Empty;
+
+    public bool CanBeDeleted { get; set; }
 }
