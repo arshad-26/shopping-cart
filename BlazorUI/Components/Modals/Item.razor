@@ -73,7 +73,7 @@
         MudDialog.Close(DialogResult.Ok(true));
 
         using MultipartFormDataContent content = new();
-        StreamContent fileContent = new(itemModel.File!.OpenReadStream());
+        StreamContent fileContent = new(itemModel.File!.OpenReadStream(long.MaxValue));
         fileContent.Headers.ContentType = new MediaTypeHeaderValue(itemModel.File!.ContentType);
         content.Add(fileContent, "\"UploadedFile\"", itemModel.File!.Name);
         AddModelData(content, itemModel);
