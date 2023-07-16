@@ -1,0 +1,7 @@
+﻿::deep .tab-content {
+    margin-top: 2em;
+}
+
+::deep .mud-tabs-toolbar {
+    background-color: #f3caca;
+}

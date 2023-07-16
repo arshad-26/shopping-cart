@@ -29,6 +29,8 @@ builder.Services.AddHttpClient("RefreshAPI", client => client.BaseAddress = new(
 builder.Services.AddHttpClientInterceptor();
 builder.Services.AddAuthorizationCore();
 
+builder.Services.AddAutoMapper(typeof(Program));
+
 builder.Services.AddMudServices(config =>
 {
     config.SnackbarConfiguration.ClearAfterNavigation = true;

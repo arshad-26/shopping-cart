@@ -1,0 +1,13 @@
+﻿::deep .mud-card-content {
+    background-color: #d6f7f7;
+    border-bottom: 1px solid #f4d6b0;
+}
+
+::deep .mud-card-actions {
+    justify-content: space-between;
+    background-color: #d6f7f7;
+}
+
+::deep .item-text{
+    font-weight:bold;
+}

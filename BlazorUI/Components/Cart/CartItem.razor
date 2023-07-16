@@ -1,0 +1,110 @@
+﻿@inject ISessionStorageService _sessionStorage
+@inject IMapper _mapper
+@inject ComponentBus _bus
+
+<div>
+    <MudCard>
+        <MudCardMedia Image="@($"data:image/jpeg;base64,{@Item.Base64Img}")" />
+        <MudCardContent>
+            <MudElement HtmlTag="p" Class="item-text">@Item.Name</MudElement>
+            <MudElement HtmlTag="p" Class="item-text">@Item.Price</MudElement>
+        </MudCardContent>
+        <MudCardActions>
+            <MudIconButton Icon="@Icons.Material.Filled.Remove" OnClick="async () => await RemoveItemAsync(Item)" />
+            <MudElement HtmlTag="span">@ItemCount</MudElement>
+            <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="async () => await AddItemAsync(Item)" />
+        </MudCardActions>
+    </MudCard>
+</div>
+
+@code {
+    private int ItemCount = 0;
+
+    [Parameter]
+    public ItemModel Item { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        string cartJson = await _sessionStorage.GetItemAsync<string>("Cart");
+
+        if (!String.IsNullOrEmpty(cartJson))
+        {
+            List<CartModel> cartItems = JsonSerializer.Deserialize<List<CartModel>>(cartJson)!;
+            CartModel? cartItem = cartItems.FirstOrDefault(x => x.ItemID == Item.ID);
+
+            if (cartItem is not null)
+                ItemCount = cartItem.Quantity;
+        }
+    }
+
+    private async Task AddItemAsync(ItemModel item)
+    {
+        CartModel cartItem = _mapper.Map<CartModel>(item);
+        List<CartModel> cartItems;
+
+        ItemCount++;
+
+        if(!await _sessionStorage.ContainKeyAsync("Cart"))
+        {
+            cartItems = new();
+
+            cartItem.Quantity = 1;
+            cartItems.Add(cartItem);
+        }
+        else
+        {
+            string cartJson = await _sessionStorage.GetItemAsync<string>("Cart");
+            cartItems = JsonSerializer.Deserialize<List<CartModel>>(cartJson)!;
+
+            CartModel? selectedItem = cartItems.FirstOrDefault(x => x.ItemID == cartItem.ItemID);
+
+            if(selectedItem is not null)
+            {
+                selectedItem.Quantity += 1;
+            }
+            else
+            {
+                cartItem.Quantity = 1;
+                cartItems.Add(cartItem);
+            }
+        }
+
+        CartCountUpdateEvent cartCountUpdateEvent = new() { CartCount = cartItems.Count };
+        await _bus.Publish(cartCountUpdateEvent);
+
+        string jsonString = JsonSerializer.Serialize(cartItems);
+        await _sessionStorage.SetItemAsync("Cart", jsonString);
+    }
+
+    private async Task RemoveItemAsync(ItemModel item)
+    {
+        string? cartJson = await _sessionStorage.GetItemAsync<string>("Cart");
+
+        if (String.IsNullOrEmpty(cartJson))
+            return;
+
+        List<CartModel> cartItems = JsonSerializer.Deserialize<List<CartModel>>(cartJson)!;
+        CartModel? selectedItem = cartItems.FirstOrDefault(x => x.ItemID == item.ID);
+
+        if (selectedItem is null || selectedItem.Quantity == 0)
+            return;
+
+        ItemCount--;
+
+        if (selectedItem.Quantity == 1)
+            cartItems.Remove(selectedItem);
+        else
+            selectedItem.Quantity -= 1;
+
+        CartCountUpdateEvent cartCountUpdateEvent = new() { CartCount = cartItems.Count };
+        await _bus.Publish(cartCountUpdateEvent);
+
+        if (cartItems.Count != 0)
+        {
+            string jsonString = JsonSerializer.Serialize(cartItems);
+            await _sessionStorage.SetItemAsync("Cart", jsonString);
+        }
+        else
+            await _sessionStorage.RemoveItemAsync("Cart");
+    }
+}

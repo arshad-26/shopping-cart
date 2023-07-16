@@ -1,28 +1,65 @@
-﻿@inject ISessionStorageService _sessionStorage
+﻿@implements IDisposable
+@inject ISessionStorageService _sessionStorage
 @inject AuthenticationProvider _authProvider
 @inject NavigationManager _navigationManager
+@inject ComponentBus _bus
 
-<MudAppBar>
-    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="async () => await OnSidebarToggled.InvokeAsync()" />
-    <MudSpacer />
-    <MudLink Href="/home" Color="Color.Inherit" Class="main-heading" Underline="Underline.None">Shopping App</MudLink>
-    <MudSpacer />
-    <MudTooltip Text="Logout">
-        <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" Edge="Edge.End" OnClick="async () => await LogoutAsync()" />
-    </MudTooltip>
-</MudAppBar>
+<div>
+    <MudAppBar>
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="async () => await OnSidebarToggled.InvokeAsync()" />
+        <MudSpacer />
+        <MudLink Href="/home" Color="Color.Inherit" Class="main-heading" Underline="Underline.None">Shopping App</MudLink>
+        <MudSpacer />
+        <AuthorizeView Roles="User">
+            <MudBadge Content="@CartCount" Overlap="true" Class="mx-6 my-4 cart-badge-icon">
+                <MudIcon Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Inherit" />
+            </MudBadge>
+        </AuthorizeView>
+        <MudTooltip Text="Logout">
+            <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" Edge="Edge.End" OnClick="async () => await LogoutAsync()" />
+        </MudTooltip>
+    </MudAppBar>
+</div>
 
 @code {
+    private int CartCount = 0;
+
     [Parameter]
     public EventCallback OnSidebarToggled { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _bus.Subscribe<CartCountUpdateEvent>(UpdateCartItems);
+
+        string cartJson = await _sessionStorage.GetItemAsync<string>("Cart");
+
+        if (!String.IsNullOrEmpty(cartJson))
+        {
+            List<CartModel> cartItems = JsonSerializer.Deserialize<List<CartModel>>(cartJson)!;
+            CartCount = cartItems.Count;
+        }
+    }
+
+    private void UpdateCartItems(MessageArgs args)
+    {
+        CartCountUpdateEvent cartCountUpdateEvent = args.GetMessage<CartCountUpdateEvent>();
+        CartCount = cartCountUpdateEvent.CartCount;
+        StateHasChanged();
+    }
 
     private async Task LogoutAsync()
     {
         await _sessionStorage.RemoveItemAsync("Token");
         await _sessionStorage.RemoveItemAsync("RefreshToken");
+        await _sessionStorage.RemoveItemAsync("Cart");
 
         _authProvider.StateChanged();
 
         _navigationManager.NavigateTo("/");
+    }
+
+    public void Dispose()
+    {
+        _bus.UnSubscribe<CartCountUpdateEvent>(UpdateCartItems);
     }
 }

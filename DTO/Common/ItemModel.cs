@@ -27,5 +27,7 @@ public class ItemModel
     [Required(ErrorMessage = "Please upload a file")]
     public IBrowserFile? File { get; set; }
 
+    public string? ImagePath { get; set; }
+
     public string Base64Img { get; set; } = String.Empty;
 }

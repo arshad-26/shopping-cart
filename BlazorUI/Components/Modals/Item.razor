@@ -116,7 +116,7 @@
 
     private void AddModelData(MultipartFormDataContent formContent, ItemModel model)
     {
-        string[] toBeExcludedProps = new string[] { "Category", "File", "Base64Img" };
+        string[] toBeExcludedProps = new string[] { "Category", "File", "Base64Img", "ImagePath" };
 
         Type modelType = model.GetType();
         IEnumerable<PropertyInfo> properties = modelType.GetProperties().Where(x => !toBeExcludedProps.Contains(x.Name));

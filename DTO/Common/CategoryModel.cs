@@ -15,4 +15,6 @@ public class CategoryModel
     public string Name { get; set; } = String.Empty;
 
     public bool CanBeDeleted { get; set; }
+
+    public IEnumerable<ItemModel>? Items { get; set; }
 }
