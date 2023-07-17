@@ -1,4 +1,7 @@
 ﻿::deep .cart-badge-icon{
     cursor:pointer;
-    margin-right:1em;
+}
+
+::deep .cart-btn {
+    padding: 0 0 0 6px;
 }

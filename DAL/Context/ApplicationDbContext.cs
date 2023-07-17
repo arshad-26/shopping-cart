@@ -13,6 +13,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<RefreshToken> RefreshToken { get; set; }
 
+    public DbSet<Order> Orders { get; set; }
+
+    public DbSet<OrderItem> OrderItems { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -39,6 +43,26 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                     .HasOne(x => x.RefreshToken)
                     .WithOne(x => x.User)
                     .HasForeignKey<RefreshToken>(x => x.UserId);
-		#endregion
-	}
+        #endregion
+
+        #region ORDER
+        modelBuilder.Entity<Order>().HasKey(x => x.Id);
+        modelBuilder.Entity<Order>()
+                    .HasOne(x => x.User)
+                    .WithMany(x => x.Orders)
+                    .HasForeignKey(x => x.UserId);
+        #endregion
+
+        #region ORDERITEM
+        modelBuilder.Entity<OrderItem>().HasKey(x => x.Id);
+        modelBuilder.Entity<OrderItem>()
+                    .HasOne(x => x.Order)
+                    .WithMany(x => x.OrderItems)
+                    .HasForeignKey(x => x.OrderId);
+        modelBuilder.Entity<OrderItem>()
+                    .HasOne(x => x.Item)
+                    .WithMany(x => x.OrderItems)
+                    .HasForeignKey(x => x.ItemId);
+        #endregion
+    }
 }

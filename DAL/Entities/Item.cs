@@ -14,6 +14,8 @@ public class Item
 
     public Category Category { get; set; }
 
+    public ICollection<OrderItem>? OrderItems { get; set; }
+
     public Item()
     {
         Name= String.Empty;

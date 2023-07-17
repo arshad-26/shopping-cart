@@ -1,0 +1,42 @@
+﻿@inject IHttpClientFactory _clientFactory
+@inject NavigationManager _navManager
+@inject ISnackbar _snackBar
+
+<MudDialog>
+    <DialogContent>
+        <MudText>@ContentText</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="async () => await ConfirmOrderAsync()">Submit</MudButton>
+        <MudButton Color="Color.Error" Variant="Variant.Filled" OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter]
+    public string ContentText { get; set; } = String.Empty;
+
+    [Parameter]
+    public List<CartModel> CartItems { get; set; } = new();
+
+    [CascadingParameter]
+    public MudDialogInstance MudDialog { get; set; } = new();
+
+    private async Task ConfirmOrderAsync()
+    {
+        HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
+        HttpResponseMessage response = await httpClient.PostAsJsonAsync<List<CartModel>>("Cart/PlaceOrder", CartItems);
+
+        if (response.IsSuccessStatusCode)
+        {
+            _navManager.NavigateTo("/cart");
+            _snackBar.Add("Order has been placed successfully", Severity.Success);
+        }
+        else
+        {
+            _snackBar.Add("An error occured while creating the order", Severity.Error);
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

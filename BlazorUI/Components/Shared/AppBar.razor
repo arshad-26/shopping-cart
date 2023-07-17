@@ -11,8 +11,8 @@
         <MudLink Href="/home" Color="Color.Inherit" Class="main-heading" Underline="Underline.None">Shopping App</MudLink>
         <MudSpacer />
         <AuthorizeView Roles="User">
-            <MudBadge Content="@CartCount" Overlap="true" Class="mx-6 my-4 cart-badge-icon">
-                <MudIcon Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Inherit" />
+            <MudBadge Content="@CartCount" Overlap="true" Class="mx-6 my-4 cart-badge-icon" OnClick="OrderNavigation">
+                <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Class="cart-btn" Color="Color.Inherit" OnClick="OrderNavigation" />
             </MudBadge>
         </AuthorizeView>
         <MudTooltip Text="Logout">
@@ -45,6 +45,14 @@
         CartCountUpdateEvent cartCountUpdateEvent = args.GetMessage<CartCountUpdateEvent>();
         CartCount = cartCountUpdateEvent.CartCount;
         StateHasChanged();
+    }
+
+    private void OrderNavigation()
+    {
+        if (CartCount == 0)
+            return;
+
+        _navigationManager.NavigateTo("/orders");
     }
 
     private async Task LogoutAsync()

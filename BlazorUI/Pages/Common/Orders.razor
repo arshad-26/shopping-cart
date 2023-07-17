@@ -1,0 +1,104 @@
+﻿@page "/orders"
+@implements IDisposable
+@attribute [Authorize(Roles = "User")]
+@inject ISessionStorageService _sessionStorage
+@inject ComponentBus _bus
+@inject IDialogService _dialog
+@inject AuthInterceptor _authInterceptor
+
+<article>
+    <MudTable Items="cartItems" FixedHeader="true" Dense="true" Hover="true">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Cart Items</MudText>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh Class="table-heading">Item</MudTh>
+            <MudTh Class="table-heading">Quantity</MudTh>
+            <MudTh Class="table-heading">Total</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Item">@context.ItemName</MudTd>
+            <MudTd DataLabel="Quantity">
+                <MudIconButton Icon="@Icons.Material.Filled.Remove" Variant="Variant.Filled" Color="Color.Error" Size="Size.Small" OnClick="async () => await RemoveItemAsync(context.ItemID)"></MudIconButton>
+                <MudElement HtmlTag="div" Class="qty-info">@context.Quantity</MudElement>
+                <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Warning" Size="Size.Small" OnClick="async () => await AddItemAsync(context.ItemID)"></MudIconButton>
+            </MudTd>
+            <MudTd DataLabel="Total">@context.TotalPrice</MudTd>
+        </RowTemplate>
+        <FooterContent>
+            <MudTd colspan="3" Class="total-info">Grand Total: @(cartItems.Select(x => x.TotalPrice).DefaultIfEmpty(0).Sum())</MudTd>
+        </FooterContent>
+        <NoRecordsContent>
+            <MudText>Cart is empty</MudText>
+        </NoRecordsContent>
+    </MudTable>
+    @if (cartItems.Count > 0)
+    {
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="order-btn" OnClick="SubmitOrder">Place Order</MudButton>
+    }
+</article>
+
+@code {
+    private List<CartModel> cartItems = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _authInterceptor.RegisterEvent();
+
+        string cartJson = await _sessionStorage.GetItemAsync<string>("Cart");
+
+        if (!String.IsNullOrEmpty(cartJson))
+            cartItems = JsonSerializer.Deserialize<List<CartModel>>(cartJson)!;
+    }
+
+    private async Task AddItemAsync(long itemID)
+    {
+        CartModel cartItem = cartItems.FirstOrDefault(x => x.ItemID == itemID)!;
+        cartItem.Quantity += 1;
+
+        string jsonString = JsonSerializer.Serialize<List<CartModel>>(cartItems);
+        await _sessionStorage.SetItemAsync("Cart", jsonString);
+
+        StateHasChanged();
+    }
+
+    private async Task RemoveItemAsync(long itemID)
+    {
+        CartModel cartItem = cartItems.FirstOrDefault(x => x.ItemID == itemID)!;
+
+        if (cartItem.Quantity == 1)
+            cartItems.Remove(cartItem);
+        else
+            cartItem.Quantity -= 1;
+
+        CartCountUpdateEvent cartCountUpdateEvent = new() { CartCount = cartItems.Count };
+        await _bus.Publish(cartCountUpdateEvent);
+
+        if(cartItems.Count != 0)
+        {
+            string jsonString = JsonSerializer.Serialize<List<CartModel>>(cartItems);
+            await _sessionStorage.SetItemAsync("Cart", jsonString);
+        }
+        else
+            await _sessionStorage.RemoveItemAsync("Cart");
+
+        StateHasChanged();
+    }
+
+    private void SubmitOrder()
+    {
+        DialogParameters parameters = new();
+
+        parameters.Add("ContentText", "Are you sure to place this order?");
+        parameters.Add("CartItems", cartItems);
+
+        DialogOptions options = new() { MaxWidth = MaxWidth.ExtraSmall, Position = DialogPosition.Center };
+
+        _dialog.Show<OrderConfirmationDialog>("Order", parameters, options);
+    }
+
+    public void Dispose()
+    {
+        _authInterceptor.DisposeEvent();
+    }
+}
