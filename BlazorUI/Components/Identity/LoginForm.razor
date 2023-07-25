@@ -40,10 +40,10 @@
 
         if (response.IsSuccessStatusCode)
         {
-            TokenModel? tokenInfo = await response.Content.ReadFromJsonAsync<TokenModel>();
+            ServiceResponse<TokenModel>? responseBody = await response.Content.ReadFromJsonAsync<ServiceResponse<TokenModel>>();
 
-            await sessionStorage.SetItemAsync("Token", tokenInfo!.Token);
-            await sessionStorage.SetItemAsync("RefreshToken", tokenInfo!.RefreshToken);
+            await sessionStorage.SetItemAsync("Token", responseBody!.ResponseData!.Token);
+            await sessionStorage.SetItemAsync("RefreshToken", responseBody!.ResponseData!.RefreshToken);
 
             authProvider.StateChanged();
 

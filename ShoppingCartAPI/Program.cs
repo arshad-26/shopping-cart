@@ -1,5 +1,5 @@
+using DTO.Identity;
 using ShoppingCartAPI.Startup;
-using ShoppingCartAPI.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 

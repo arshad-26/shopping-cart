@@ -57,7 +57,9 @@
     private async Task<TableData<CategoryModel>> ServerReload(TableState state)
     {
         HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
-        IEnumerable<CategoryModel>? data = await httpClient.GetFromJsonAsync<List<CategoryModel>>("Item/GetCategories");
+        ServiceResponse<IEnumerable<CategoryModel>> response = (await httpClient.GetFromJsonAsync<ServiceResponse<IEnumerable<CategoryModel>>>("Item/GetCategories"))!;
+
+        IEnumerable<CategoryModel> data = response.ResponseData!;
 
         data = data!.Where(element =>
         {

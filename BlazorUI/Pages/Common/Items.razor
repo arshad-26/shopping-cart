@@ -13,7 +13,7 @@
             <MudSpacer />
             <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Immediate="true" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
             <MudSpacer />
-            <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Tertiary" Size="Size.Medium" OnClick="@(async (e) => await OpenAddDialog())" />
+            <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Tertiary" Size="Size.Medium" OnClick="@OpenAddDialog" />
         </ToolBarContent>
         <HeaderContent>
             <MudTh Class="table-heading">
@@ -54,20 +54,26 @@
     private string searchString = "";
     private int totalItems;
     private MudTable<ItemModel> table;
+    private IEnumerable<CategoryModel> categories;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         _authInterceptor.RegisterEvent();
 
         _bus.Subscribe<ItemAddedEvent>(ItemAddedHandler);
         _bus.Subscribe<ItemDeletedEvent>(ItemDeletedHandler);
         _bus.Subscribe<ItemEditEvent>(ItemEditHandler);
+
+        HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
+        ServiceResponse<IEnumerable<CategoryModel>> response = (await httpClient.GetFromJsonAsync<ServiceResponse<IEnumerable<CategoryModel>>>("Item/GetCategories"))!;
+        categories = response.ResponseData!;
     }
 
     private async Task<TableData<ItemModel>> ServerReload(TableState state)
     {
         HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
-        IEnumerable<ItemModel>? data = await httpClient.GetFromJsonAsync<List<ItemModel>>("Item/GetItems");
+        ServiceResponse<IEnumerable<ItemModel>> response = (await httpClient.GetFromJsonAsync<ServiceResponse<IEnumerable<ItemModel>>>("Item/GetItems"))!;
+        IEnumerable<ItemModel> data = response.ResponseData!;
 
         data = data!.Where(element =>
         {
@@ -133,10 +139,7 @@
             table.ReloadServerData();
     }
 
-    private async Task OpenAddDialog() {
-        HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
-        List<CategoryModel>? categories = await httpClient.GetFromJsonAsync<List<CategoryModel>>("Item/GetCategories");
-
+    private void OpenAddDialog() {
         DialogParameters parameters = new();
         parameters.Add("Categories", categories);
 
@@ -148,8 +151,8 @@
         DialogParameters parameters = new();
 
         HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
-        List<CategoryModel>? categories = await httpClient.GetFromJsonAsync<List<CategoryModel>>("Item/GetCategories");
-        ItemModel selectedItem = (await httpClient.GetFromJsonAsync<ItemModel>($"Item/EditItem?ID={ID}"))!;
+        ServiceResponse<ItemModel> response = (await httpClient.GetFromJsonAsync<ServiceResponse<ItemModel>>($"Item/EditItem?ID={ID}"))!;
+        ItemModel selectedItem = response.ResponseData!;
 
         parameters.Add("Categories", categories);
         parameters.Add("EditItemModel", selectedItem);

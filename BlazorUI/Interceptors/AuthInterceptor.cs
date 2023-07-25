@@ -1,4 +1,5 @@
 ﻿using Blazored.SessionStorage;
+using DTO.Common;
 using DTO.Identity;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Net.Http.Json;
@@ -46,15 +47,15 @@ public class AuthInterceptor
 
                 response.EnsureSuccessStatusCode();
 
-                TokenModel? newTokenInfo = await response.Content.ReadFromJsonAsync<TokenModel>();
+                ServiceResponse<TokenModel>? newTokenInfo = await response.Content.ReadFromJsonAsync<ServiceResponse<TokenModel>>();
 
-                await _sessionStorage.SetItemAsync("Token", newTokenInfo!.Token);
-                await _sessionStorage.SetItemAsync("RefreshToken", newTokenInfo!.RefreshToken);
+                await _sessionStorage.SetItemAsync("Token", newTokenInfo!.ResponseData!.Token);
+                await _sessionStorage.SetItemAsync("RefreshToken", newTokenInfo!.ResponseData!.RefreshToken);
             }
 
             string token = await _sessionStorage.GetItemAsync<string>("Token");
 
-            e.Request.Headers.Authorization = new("Bearer", token);
+            e.Request.Headers.Authorization = new ("Bearer", token);
         }
     }
 

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BusinessLayer.Interfaces;
 using DAL.Context;
 using DAL.Entities;
 using DTO.Common;
@@ -18,59 +19,26 @@ namespace ShoppingCartAPI.Controllers;
 [Authorize(Roles = "User")]
 public class CartController : ControllerBase
 {
-    private readonly ApplicationDbContext _dbContext;
-    private readonly IMapper _mapper;
-    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly ICartService _cartService;
 
-    public CartController(ApplicationDbContext dbContext, IMapper mapper, UserManager<ApplicationUser> userManager)
+    public CartController(ICartService cartService)
     {
-        _dbContext = dbContext;
-        _mapper = mapper;
-        _userManager = userManager;
+        _cartService = cartService;
     }
 
     [HttpGet]
-    public IActionResult GetItems()
+    public async Task<IActionResult> GetItems()
     {
-        List<Category> tabsContentDb = _dbContext.Category.Include(x => x.Items).ToList();
-        List<CategoryModel> tabsContent = _mapper.Map<List<CategoryModel>>(tabsContentDb);
-
-        tabsContent.Select(x => x.Items!).SelectMany(x => x).ToList().ForEach(item =>
-        {
-            using Image itemImg = Image.FromFile(Path.GetFullPath("ItemImages") + "\\" + item.ImagePath);
-            using Image thumbnail = itemImg.GetThumbnailImage(200, 200, () => false, IntPtr.Zero);
-
-            byte[] fileArr = (byte[])new ImageConverter().ConvertTo(thumbnail, typeof(byte[]))!;
-            item.Base64Img = Convert.ToBase64String(fileArr);
-        });
-
-        return Ok(tabsContent);
+        ServiceResponse<IEnumerable<CategoryModel>> response = await _cartService.GetItems();
+        return StatusCode((int)response.StatusCode, response);
     }
 
     [HttpPost]
     public async Task<IActionResult> PlaceOrder(List<CartModel> cartItems)
     {
         string email = User.FindFirstValue(ClaimTypes.Email)!;
-        ApplicationUser user = (await _userManager.FindByNameAsync(email))!;
 
-        List<OrderItem> orderItems = new ();
-        
-        foreach(CartModel item in cartItems)
-        {
-            Item dbItem = (await _dbContext.Item.FirstOrDefaultAsync(x => x.ID == item.ItemID))!;
-            
-            OrderItem orderedItem = new ();
-            orderedItem.Item = dbItem;
-            orderedItem.Quantity = item.Quantity;
-
-            orderItems.Add(orderedItem);
-        }
-
-        Order order = new() { User = user, OrderItems = orderItems };
-
-        await _dbContext.Orders.AddAsync(order);
-        await _dbContext.SaveChangesAsync();
-
-        return Ok();
+        ServiceResponse response = await _cartService.PlaceOrder(email, cartItems);
+        return StatusCode((int)response.StatusCode, response);
     }
 }
