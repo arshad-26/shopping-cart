@@ -13,6 +13,6 @@ public class HomeController : ControllerBase
     [HttpGet]
     public IActionResult GetSample()
     {
-        return Ok("Hello World");
+        return Ok("");
     }
 }
