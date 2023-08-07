@@ -58,7 +58,8 @@
         if (!String.IsNullOrWhiteSpace(categoryModel.Name))
         {
             HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
-            categoryExists = await httpClient.GetFromJsonAsync<bool>($"Item/CategoryExists?category={categoryModel.Name}");
+            ServiceResponse<bool?> response = (await httpClient.GetFromJsonAsync<ServiceResponse<bool?>>($"Item/CategoryExists?category={categoryModel.Name}"))!;
+            categoryExists = response.ResponseData!.Value;
 
             if (categoryExists)
             {

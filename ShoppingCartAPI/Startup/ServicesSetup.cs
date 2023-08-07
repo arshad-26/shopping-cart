@@ -1,5 +1,8 @@
+using BusinessLayer.Interfaces;
+using BusinessLayer.Services;
 using DAL.Context;
 using DAL.Entities;
+using DTO.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +38,11 @@ public static class ServicesSetup
 
         // Singleton Services
         services.AddSingleton<JWTModel>(_jwtModel);
+
+        // Scoped Services
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IItemService, ItemService>();
+        services.AddScoped<ICartService, CartService>();
 
         return services;        
     }

@@ -41,7 +41,8 @@
         _authInterceptor.RegisterEvent();
 
         HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
-        cartList = (await httpClient.GetFromJsonAsync<List<CategoryModel>>("Cart/GetItems"))!;
+        ServiceResponse<IEnumerable<CategoryModel>> response = (await httpClient.GetFromJsonAsync<ServiceResponse<IEnumerable<CategoryModel>>>("Cart/GetItems"))!;
+        cartList = (response.ResponseData as List<CategoryModel>)!;
         StateHasChanged();
     }
 

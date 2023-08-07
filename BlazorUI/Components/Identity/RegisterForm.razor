@@ -45,7 +45,7 @@
 
     private async Task<bool> EmailExists()
     {
-        bool emailExists = false;
+        bool? emailExists = false;
 
         FieldIdentifier emailControlIdentifier = editContext!.Field(nameof(registerModel.Email));
         modelState!.Clear(emailControlIdentifier);
@@ -53,16 +53,17 @@
         if (!String.IsNullOrWhiteSpace(registerModel.Email))
         {
             HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
-            emailExists = await httpClient.GetFromJsonAsync<bool>($"Identity/EmailExists?email={registerModel.Email}");
+            ServiceResponse<bool?> response = (await httpClient.GetFromJsonAsync<ServiceResponse<bool?>>($"Identity/EmailExists?email={registerModel.Email}"))!;
+            emailExists = response.ResponseData;
 
-            if (emailExists)
+            if (emailExists!.Value)
             {
                 modelState.Add(emailControlIdentifier, "Email already exists");
                 editContext.NotifyValidationStateChanged();
             }
         }
 
-        return emailExists;
+        return emailExists.Value;
     }
 
     private async Task HandleValidSubmit()
