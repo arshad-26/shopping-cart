@@ -1,6 +1,8 @@
 ﻿@inject IHttpClientFactory _clientFactory
 @inject NavigationManager _navManager
 @inject ISnackbar _snackBar
+@inject ISessionStorageService _sessionStorage
+@inject ComponentBus _bus
 
 <MudDialog>
     <DialogContent>
@@ -29,6 +31,15 @@
 
         if (response.IsSuccessStatusCode)
         {
+            #region CLEAR SESSION DATA
+
+            await _sessionStorage.RemoveItemAsync("Cart");
+
+            CartCountUpdateEvent cartCountUpdateEvent = new ();
+            await _bus.Publish(cartCountUpdateEvent);
+
+            #endregion
+            
             _navManager.NavigateTo("/cart");
             _snackBar.Add("Order has been placed successfully", Severity.Success);
         }
