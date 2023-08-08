@@ -11,9 +11,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorUI", "BlazorUI\Blazor
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DTO", "DTO\DTO.csproj", "{A9DA2B4A-8309-4246-A13E-1FC138B27708}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessLayer", "BusinessLayer\BusinessLayer.csproj", "{DA89AF1B-CBD2-4ACC-92D4-FB87DEA3D81F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BusinessLayer", "BusinessLayer\BusinessLayer.csproj", "{DA89AF1B-CBD2-4ACC-92D4-FB87DEA3D81F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{AFB04658-8516-4BF7-A502-130114D6D161}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "UnitTests\UnitTests.csproj", "{AFB04658-8516-4BF7-A502-130114D6D161}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Repositories", "Repositories\Repositories.csproj", "{EABB50EA-9FEF-449E-B786-C5F1DC3DD7CF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{AFB04658-8516-4BF7-A502-130114D6D161}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AFB04658-8516-4BF7-A502-130114D6D161}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AFB04658-8516-4BF7-A502-130114D6D161}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EABB50EA-9FEF-449E-B786-C5F1DC3DD7CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EABB50EA-9FEF-449E-B786-C5F1DC3DD7CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EABB50EA-9FEF-449E-B786-C5F1DC3DD7CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EABB50EA-9FEF-449E-B786-C5F1DC3DD7CF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
