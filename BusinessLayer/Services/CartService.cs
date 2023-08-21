@@ -5,6 +5,7 @@ using DAL.Entities;
 using DTO.Common;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Repositories.Interface;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -17,14 +18,22 @@ namespace BusinessLayer.Services;
 
 public class CartService : ICartService
 {
-    private readonly ApplicationDbContext _dbContext;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IBaseEntityRepository<Category> _categoryRepository;
+    private readonly IBaseEntityRepository<Item> _itemRepository;
+    private readonly IBaseEntityRepository<Order> _orderRepository;
     private readonly IMapper _mapper;
     
-    public CartService(ApplicationDbContext dbContext, UserManager<ApplicationUser> userManager, IMapper mapper)
+    public CartService(UserManager<ApplicationUser> userManager,
+        IBaseEntityRepository<Category> categoryRepository,
+        IBaseEntityRepository<Item> itemRepository,
+        IBaseEntityRepository<Order> orderRepository,
+        IMapper mapper)
     {
-        _dbContext = dbContext;
         _userManager = userManager;
+        _categoryRepository = categoryRepository;
+        _itemRepository = itemRepository;
+        _orderRepository = orderRepository;
         _mapper = mapper;
     }
     
@@ -32,15 +41,15 @@ public class CartService : ICartService
     {
         ServiceResponse<IEnumerable<CategoryModel>> response = new ();
 
-        List<CategoryModel> tabsContent = await _dbContext.Category.AsQueryable().GroupJoin(_dbContext.Item.AsQueryable(),
-                                                        c => c.CategoryID,
-                                                        i => i.CategoryID,
-                                                        (category, items) => new CategoryModel()
-                                                        {
-                                                            CategoryID = category.CategoryID,
-                                                            Name = category.Name,
-                                                            Items = _mapper.Map<IEnumerable<ItemModel>>(items)
-                                                        }).ToListAsync();
+        List<CategoryModel> tabsContent = await _categoryRepository.GetAll().GroupJoin(_itemRepository.GetAll(),
+                                                                                c => c.CategoryID,
+                                                                                i => i.CategoryID,
+                                                                                (category, items) => new CategoryModel()
+                                                                                {
+                                                                                    CategoryID = category.CategoryID,
+                                                                                    Name = category.Name,
+                                                                                    Items = _mapper.Map<IEnumerable<ItemModel>>(items)
+                                                                                }).ToListAsync();
 
         tabsContent.SelectMany(x => x.Items!).ToList().ForEach(item =>
         {
@@ -65,7 +74,7 @@ public class CartService : ICartService
 
         foreach (CartModel item in cartItems)
         {
-            Item dbItem = (await _dbContext.Item.FirstOrDefaultAsync(x => x.ID == item.ItemID))!;
+            Item dbItem = (await _itemRepository.FirstOrDefaultAsync(x => x.ID == item.ItemID))!;
 
             OrderItem orderedItem = new();
             orderedItem.Item = dbItem;
@@ -75,9 +84,7 @@ public class CartService : ICartService
         }
 
         Order order = new() { User = user, OrderItems = orderItems };
-
-        await _dbContext.Orders.AddAsync(order);
-        await _dbContext.SaveChangesAsync();
+        await _orderRepository.AddAsync(order);
 
         return response;
     }

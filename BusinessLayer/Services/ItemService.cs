@@ -12,17 +12,25 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Drawing;
 using Microsoft.AspNetCore.Http;
+using Repositories.Interface;
 
 namespace BusinessLayer.Services;
 
 public class ItemService : IItemService
 {
     private readonly ApplicationDbContext _dbContext;
+    private readonly IBaseEntityRepository<Category> _categoryRepository;
+    private readonly IBaseEntityRepository<Item> _itemRepository;
     private readonly IMapper _mapper;
 
-    public ItemService(ApplicationDbContext dbContext, IMapper mapper)
+    public ItemService(ApplicationDbContext dbContext,
+        IBaseEntityRepository<Category> categoryRepository,
+        IBaseEntityRepository<Item> itemRepository,
+        IMapper mapper)
     {
         _dbContext = dbContext;
+        _categoryRepository = categoryRepository;
+        _itemRepository = itemRepository;
         _mapper = mapper;
     }
 
@@ -30,7 +38,7 @@ public class ItemService : IItemService
     {
         ServiceResponse<IEnumerable<CategoryModel>> response = new ();
 
-        List<CategoryModel> categories = await _dbContext.Category.AsQueryable().GroupJoin(_dbContext.Item.AsQueryable(),
+        List<CategoryModel> categories = await _categoryRepository.GetAll().GroupJoin(_itemRepository.GetAll(),
                                                                      c => c.CategoryID,
                                                                      i => i.CategoryID,
                                                                      (category, items) => new CategoryModel()
@@ -50,8 +58,7 @@ public class ItemService : IItemService
         ServiceResponse response = new ();
 
         Category category = _mapper.Map<Category>(categoryModel);
-        await _dbContext.Category.AddAsync(category);
-        await _dbContext.SaveChangesAsync();
+        await _categoryRepository.AddAsync(category);
 
         response.StatusCode = HttpStatusCode.Created;
         return response;
@@ -62,9 +69,7 @@ public class ItemService : IItemService
         ServiceResponse response = new ();
 
         Category? category = await _dbContext.Category.FirstOrDefaultAsync(x => x.CategoryID == categoryID);
-
-        _dbContext.Category.Remove(category!);
-        await _dbContext.SaveChangesAsync();
+        await _categoryRepository.RemoveAsync(category!);
 
         response.StatusCode = HttpStatusCode.NoContent;
         return response;
@@ -74,7 +79,7 @@ public class ItemService : IItemService
     {
         ServiceResponse<bool?> response = new ();
 
-        response.ResponseData = await _dbContext.Category.AnyAsync(x => x.Name == category);
+        response.ResponseData = await _categoryRepository.AnyAsync(x => x.Name == category);
         return response;
     }
 
@@ -82,7 +87,7 @@ public class ItemService : IItemService
     {
         ServiceResponse<IEnumerable<ItemModel>> response = new ();
 
-        List<ItemModel> totalItems = await _dbContext.Item.AsQueryable().Join(_dbContext.Category.AsQueryable(),
+        List<ItemModel> totalItems = await _itemRepository.GetAll().Join(_categoryRepository.GetAll(),
                                                             item => item.CategoryID,
                                                             category => category.CategoryID,
                                                             (item, category) => new ItemModel()
@@ -113,8 +118,8 @@ public class ItemService : IItemService
     {
         ServiceResponse response = new ();
 
-        Category categoryEntity = (await _dbContext.Category.FirstOrDefaultAsync(x => x.CategoryID == itemModel.CategoryID))!;
-        string category = categoryEntity.Name;
+        Category? categoryEntity = await _categoryRepository.FirstOrDefaultAsync(x => x.CategoryID == itemModel.CategoryID);
+        string category = categoryEntity!.Name;
 
         Item item = new()
         {
@@ -125,8 +130,7 @@ public class ItemService : IItemService
 
         await SaveFileAsync(category, itemModel.UploadedFile!, item);
 
-        await _dbContext.Item.AddAsync(item);
-        await _dbContext.SaveChangesAsync();
+        await _itemRepository.AddAsync(item);
 
         response.StatusCode = HttpStatusCode.NoContent;
         return response;
@@ -136,7 +140,7 @@ public class ItemService : IItemService
     {
         ServiceResponse<ItemModel> response = new ();
         
-        Item item = (await _dbContext.Item.FirstOrDefaultAsync(x => x.ID == ID))!;
+        Item item = (await _itemRepository.FirstOrDefaultAsync(x => x.ID == ID))!;
         ItemModel itemModel = _mapper.Map<ItemModel>(item);
 
         {
@@ -155,17 +159,17 @@ public class ItemService : IItemService
     {
         ServiceResponse response = new ();
         
-        Item item = (await _dbContext.Item.FirstOrDefaultAsync(x => x.ID == itemModel.ID))!;
-        Category category = (await _dbContext.Category.FirstOrDefaultAsync(x => x.CategoryID == itemModel.CategoryID))!;
+        Item item = (await _itemRepository.FirstOrDefaultAsync(x => x.ID == itemModel.ID))!;
+        Category category = (await _categoryRepository.FirstOrDefaultAsync(x => x.CategoryID == itemModel.CategoryID))!;
 
         item.Name = itemModel.Name;
         item.Price = itemModel.Price;
         item.Category = category;
 
-        System.IO.File.Delete(Path.GetFullPath("ItemImages") + "\\" + item.ImagePath);
+        File.Delete(Path.GetFullPath("ItemImages") + "\\" + item.ImagePath);
         await SaveFileAsync(category.Name, itemModel.UploadedFile!, item);
 
-        await _dbContext.SaveChangesAsync();
+        await _itemRepository.UpdateAsync(item);
 
         return response;
     }
@@ -177,10 +181,9 @@ public class ItemService : IItemService
         Item selectedItem = (await _dbContext.Item.FirstOrDefaultAsync(x => x.ID == ID))!;
         string relativeImgPath = selectedItem.ImagePath;
 
-        System.IO.File.Delete(Path.GetFullPath("ItemImages") + "\\" + relativeImgPath);
+        File.Delete(Path.GetFullPath("ItemImages") + "\\" + relativeImgPath);
 
-        _dbContext.Item.Remove(selectedItem);
-        await _dbContext.SaveChangesAsync();
+        await _itemRepository.RemoveAsync(selectedItem);
 
         return response;
     }
