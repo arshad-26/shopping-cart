@@ -37,7 +37,7 @@ public class AuthInterceptor
 
             DateTime timeUTC = DateTime.UtcNow;
 
-            if((expTime - timeUTC).TotalMinutes <= 2)
+            if((expTime - timeUTC).TotalSeconds <= 30)
             {
                 string expiredToken = await _sessionStorage.GetItemAsync<string>("Token");
                 string refreshToken = await _sessionStorage.GetItemAsync<string>("RefreshToken");

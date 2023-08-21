@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Repositories.Interface;
+using Repositories.Repository;
 using ShoppingCartAPI.Models;
 using System.Text;
 
@@ -43,6 +45,7 @@ public static class ServicesSetup
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IItemService, ItemService>();
         services.AddScoped<ICartService, CartService>();
+        services.AddScoped(typeof(IBaseEntityRepository<>), typeof(BaseEntityRepository<>));
 
         return services;        
     }
@@ -86,7 +89,8 @@ public static class ServicesSetup
             {
                 ValidAudience = _jwtModel.ValidAudience,
                 ValidIssuer = _jwtModel.ValidIssuer,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtModel.Secret))
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtModel.Secret)),
+                ClockSkew = TimeSpan.FromSeconds(5)
             };
         });
 

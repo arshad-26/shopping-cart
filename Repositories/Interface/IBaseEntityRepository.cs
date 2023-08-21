@@ -20,4 +20,8 @@ public interface IBaseEntityRepository<T> where T : class
     Task RemoveAsync(T entity);
 
     Task RemoveRangeAsync(IEnumerable<T> entities);
+
+    Task UpdateAsync(T entity);
+
+    Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> filter);
 }

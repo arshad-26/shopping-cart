@@ -32,6 +32,8 @@ public class BaseEntityRepository<T> : IBaseEntityRepository<T> where T : class
         return query;
     }
 
+    public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> filter) => await _dbContext.Set<T>().FirstOrDefaultAsync(filter);
+
     public async Task AddAsync(T entity)
     {
         _dbContext.Set<T>().Add(entity);
@@ -49,6 +51,12 @@ public class BaseEntityRepository<T> : IBaseEntityRepository<T> where T : class
     public async Task RemoveAsync(T entity)
     {
         _dbContext.Set<T>().Remove(entity);
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task UpdateAsync(T entity)
+    {
+        _dbContext.Update<T>(entity);
         await _dbContext.SaveChangesAsync();
     }
 

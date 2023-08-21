@@ -14,6 +14,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net;
+using Repositories.Interface;
 
 namespace BusinessLayer.Services;
 
@@ -21,15 +22,22 @@ public class AuthService : IAuthService
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
-    private readonly ApplicationDbContext _dbContext;
+    private readonly IBaseEntityRepository<ApplicationUser> _userRepository;
+    private readonly IBaseEntityRepository<RefreshToken> _refreshTokenRepository;
     private readonly JWTModel _jwtModel;
 
-    public AuthService(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, JWTModel jwtModel, ApplicationDbContext dbContext)
+    public AuthService(
+        UserManager<ApplicationUser> userManager, 
+        RoleManager<IdentityRole> roleManager,
+        JWTModel jwtModel, 
+        IBaseEntityRepository<ApplicationUser> userRepository,
+        IBaseEntityRepository<RefreshToken> refreshTokenRepository)
     {
         _userManager = userManager;
         _roleManager = roleManager;
         _jwtModel = jwtModel;
-        _dbContext = dbContext;
+        _userRepository = userRepository;
+        _refreshTokenRepository = refreshTokenRepository;
     }
 
     public async Task<ServiceResponse> RegisterUser(RegisterModel registerModel)
@@ -121,7 +129,7 @@ public class AuthService : IAuthService
         long ticks = long.Parse(tokenExp);
         DateTime tokenExpTime = GetTokenExpTime(ticks);
 
-        if (user is null || user.RefreshToken!.Token != refreshToken || (tokenExpTime - DateTime.UtcNow).TotalMinutes > 2 || user.RefreshToken!.ExpiresAt <= DateTime.UtcNow)
+        if (user is null || user.RefreshToken!.Token != refreshToken || (tokenExpTime - DateTime.UtcNow).TotalSeconds > 30 || user.RefreshToken!.ExpiresAt <= DateTime.UtcNow)
         {
             response.StatusCode = HttpStatusCode.BadRequest;
             response.ErrorMessage = "Invalid request. Please check the parameters";
@@ -149,7 +157,7 @@ public class AuthService : IAuthService
     public async Task<ServiceResponse<bool?>> EmailExists(string email)
     {
         ServiceResponse<bool?> response = new ();
-        response.ResponseData = await _dbContext.Users.AnyAsync(x => x.Email == email);
+        response.ResponseData = await _userRepository.AnyAsync(x => x.Email == email);
 
         return response;
     }
@@ -171,11 +179,11 @@ public class AuthService : IAuthService
     {
         string refreshToken;
 
-        RefreshToken? existingRefreshToken = await _dbContext.RefreshToken.FirstOrDefaultAsync(x => x.UserId == userId);
+        RefreshToken? existingRefreshToken = await _refreshTokenRepository.FirstOrDefaultAsync(x => x.UserId == userId);
 
         if (existingRefreshToken is null)
         {
-            ApplicationUser? user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == userId);
+            ApplicationUser? user = await _userRepository.FirstOrDefaultAsync(x => x.Id == userId);
 
             RefreshToken newRefreshToken = new ();
 
@@ -185,6 +193,8 @@ public class AuthService : IAuthService
 
             user!.RefreshToken = newRefreshToken;
 
+            await _userRepository.UpdateAsync(user);
+
             refreshToken = newRefreshToken.Token;
         }
         else
@@ -193,12 +203,12 @@ public class AuthService : IAuthService
             {
                 existingRefreshToken.Token = Guid.NewGuid().ToString();
                 existingRefreshToken.ExpiresAt = DateTime.UtcNow.AddHours(8);
+
+                await _refreshTokenRepository.UpdateAsync(existingRefreshToken);
             }
 
             refreshToken = existingRefreshToken.Token;
         }
-
-        await _dbContext.SaveChangesAsync();
 
         return refreshToken;
     }
