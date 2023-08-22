@@ -7,6 +7,9 @@
             <MudNavLink Href="/categories" Match="NavLinkMatch.All">Categories</MudNavLink>
             <MudNavLink Href="/items" Match="NavLinkMatch.All">Items</MudNavLink>
         </AuthorizeView>
+        <AuthorizeView Roles="User">
+            <MudNavLink Href="/home" Match="NavLinkMatch.All">Home</MudNavLink>
+        </AuthorizeView>
     </MudNavMenu>
 </MudDrawer>
 

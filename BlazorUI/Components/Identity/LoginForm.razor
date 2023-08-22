@@ -47,11 +47,25 @@
 
             authProvider.StateChanged();
 
-            navigationManager.NavigateTo("/home");
+            string role = GetRoleClaimFromToken(responseBody!.ResponseData!.Token);
+
+            if(role == "Admin")
+                navigationManager.NavigateTo("/categories");
+            else
+                navigationManager.NavigateTo("/home");
         }
         else
         {
             snackBar.Add("Email or Password is incorrect", Severity.Error);
         }
+    }
+
+    private string GetRoleClaimFromToken(string token)
+    {
+        JwtSecurityTokenHandler handler = new();
+        JwtSecurityToken jwtSecurityToken = handler.ReadJwtToken(token);
+
+        string role = jwtSecurityToken.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Role)!.Value;
+        return role;
     }
 }
