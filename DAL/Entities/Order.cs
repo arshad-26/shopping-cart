@@ -12,6 +12,8 @@ public class Order
 
     public string UserId { get; set; } = String.Empty;
 
+    public DateTime OrderDate { get; }
+
     public ApplicationUser User { get; set; } = new();
 
     public ICollection<OrderItem>? OrderItems { get; set;}

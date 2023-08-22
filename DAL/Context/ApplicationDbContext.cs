@@ -47,6 +47,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
         #region ORDER
         modelBuilder.Entity<Order>().HasKey(x => x.Id);
+        modelBuilder.Entity<Order>().Property(x => x.OrderDate).HasDefaultValueSql("GetUtcDate()");
         modelBuilder.Entity<Order>()
                     .HasOne(x => x.User)
                     .WithMany(x => x.Orders)

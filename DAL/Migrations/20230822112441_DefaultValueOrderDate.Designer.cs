@@ -4,6 +4,7 @@ using DAL.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230822112441_DefaultValueOrderDate")]
+    partial class DefaultValueOrderDate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -101,7 +104,7 @@ namespace DAL.Migrations
 
                     b.HasKey("CategoryID");
 
-                    b.ToTable("Category", (string)null);
+                    b.ToTable("Category");
                 });
 
             modelBuilder.Entity("DAL.Entities.Item", b =>
@@ -130,7 +133,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("CategoryID");
 
-                    b.ToTable("Item", (string)null);
+                    b.ToTable("Item");
                 });
 
             modelBuilder.Entity("DAL.Entities.Order", b =>
@@ -154,7 +157,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("DAL.Entities.OrderItem", b =>
@@ -180,7 +183,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("OrderItems", (string)null);
+                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("DAL.Entities.RefreshToken", b =>
@@ -197,7 +200,7 @@ namespace DAL.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("RefreshToken", (string)null);
+                    b.ToTable("RefreshToken");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
