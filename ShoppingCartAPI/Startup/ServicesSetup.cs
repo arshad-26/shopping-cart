@@ -45,6 +45,7 @@ public static class ServicesSetup
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IItemService, ItemService>();
         services.AddScoped<ICartService, CartService>();
+        services.AddScoped<IOrderService, OrderService>();
         services.AddScoped(typeof(IBaseEntityRepository<>), typeof(BaseEntityRepository<>));
 
         return services;        

@@ -14,6 +14,8 @@ public class Order
 
     public DateTime OrderDate { get; }
 
+    public decimal TotalPrice { get; set; }
+
     public ApplicationUser User { get; set; } = new();
 
     public ICollection<OrderItem>? OrderItems { get; set;}

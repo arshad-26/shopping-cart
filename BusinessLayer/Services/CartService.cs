@@ -83,7 +83,9 @@ public class CartService : ICartService
             orderItems.Add(orderedItem);
         }
 
-        Order order = new() { User = user, OrderItems = orderItems };
+        decimal totalPrice = cartItems.Select(x => x.TotalPrice).DefaultIfEmpty(decimal.Zero).Sum();
+
+        Order order = new() { User = user, OrderItems = orderItems, TotalPrice = totalPrice };
         await _orderRepository.AddAsync(order);
 
         return response;
