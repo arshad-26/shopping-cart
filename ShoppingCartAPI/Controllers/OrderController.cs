@@ -8,7 +8,7 @@ namespace ShoppingCartAPI.Controllers;
 
 [Route("api/[controller]/[action]")]
 [ApiController]
-//[Authorize]
+[Authorize]
 public class OrderController : ControllerBase
 {
     private readonly IOrderService _orderService;
@@ -19,9 +19,9 @@ public class OrderController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetUserOrders(string userID)
+    public async Task<IActionResult> GetUserOrders(string email)
     {
-        ServiceResponse<IEnumerable<OrderDetails>> response = await _orderService.GetOrdersForUser(userID);
+        ServiceResponse<IEnumerable<OrderDetails>> response = await _orderService.GetOrdersForUser(email);
         return StatusCode((int)response.StatusCode, response);
     }
 }

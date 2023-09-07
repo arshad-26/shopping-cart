@@ -1,0 +1,83 @@
+﻿@page "/orderhistory"
+@attribute [Authorize]
+@inject AuthInterceptor _authInterceptor
+@inject IHttpClientFactory _clientFactory
+@inject IJSRuntime _jsRuntime
+@implements IDisposable
+
+<section class="order-container">
+    @if(userOrderDetails is null || userOrderDetails.Count == 0)
+    {
+        <MudCard>
+            <MudCardContent>
+                <MudText Class="no-content-text">No Orders Found</MudText>
+            </MudCardContent>
+        </MudCard>
+    }
+    else
+    {
+        @foreach (OrderDetails orderDetail in userOrderDetails)
+        {
+            List<OrderItemDetails> orderItems = orderDetail.Items.ToList();
+            StringBuilder sb = new();
+
+            for (int i = 0; i < orderItems.Count; i++)
+            {
+                sb.Append(orderItems[i].Name);
+
+                if (orderItems[i].Quantity > 1)
+                    sb.Append($"({orderItems[i].Quantity})");
+
+                if (i != orderItems.Count - 1)
+                    sb.Append("+");
+            }
+
+            DateTime localDateTime = TimeZoneInfo.ConvertTimeFromUtc(orderDetail.OrderDate, localTimezoneInfo);
+
+            <MudCard>
+                <MudCardContent>
+                    <MudText>@sb.ToString()</MudText>
+                    <MudText Class="price-info">@orderDetail.TotalPrice</MudText>
+                    <MudText Class="order-date-info">@localDateTime.ToString("dd/MM/yyyy hh:mm tt")</MudText>
+                    <MudElement HtmlTag="hr" Class="line-seperator"></MudElement>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Variant="Variant.Outlined">REORDER</MudButton>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Secondary">RATE ORDER</MudButton>
+                </MudCardActions>
+            </MudCard>
+        }
+    }
+    
+</section>
+
+@code {
+    #nullable disable
+    private List<OrderDetails> userOrderDetails;
+    
+    private TimeZoneInfo localTimezoneInfo;
+
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthState { get; set; }
+    #nullable restore
+
+    protected override async Task OnInitializedAsync()
+    {
+        _authInterceptor.RegisterEvent();
+
+        AuthenticationState authState = await AuthState;
+        string email = authState.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email)!.Value;
+
+        HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
+        ServiceResponse<IEnumerable<OrderDetails>> response = (await httpClient.GetFromJsonAsync<ServiceResponse<IEnumerable<OrderDetails>>>($"Order/GetUserOrders?email={email}"))!;
+        userOrderDetails = response.ResponseData!.ToList();
+
+        string localTimezone = await _jsRuntime.InvokeAsync<string>("GetUserTimeZone");
+        localTimezoneInfo = TimeZoneInfo.FindSystemTimeZoneById(localTimezone);
+    }
+
+    public void Dispose()
+    {
+        _authInterceptor.DisposeEvent();
+    }
+}

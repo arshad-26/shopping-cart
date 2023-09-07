@@ -1,0 +1,33 @@
+﻿.order-container {
+    margin-top: 2em;
+    max-height: 75vh;
+    overflow: auto;
+    border-radius:5px;
+}
+
+::deep .no-content-text{
+    text-align: center;
+    font-size: 1.5rem;
+}
+
+::deep .mud-card {
+    border-radius: 0;
+    border-bottom: 3px solid black;
+}
+
+::deep .price-info, ::deep .order-date-info {
+    margin-top: 0.5em;
+    font-size: 0.8rem;
+    color: grey;
+}
+
+::deep .line-seperator {
+    border-top: 1px dotted black;
+    background-color: transparent;
+    margin-top:1em;
+}
+
+::deep .mud-card-actions{
+    margin-bottom: 1em;
+    justify-content: space-between;
+}

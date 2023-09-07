@@ -16,30 +16,39 @@ public class OrderService : IOrderService
     private readonly IBaseEntityRepository<Order> _orderRepository;
     private readonly IBaseEntityRepository<OrderItem> _orderItemRepository;
     private readonly IBaseEntityRepository<Item> _itemRepository;
+    private readonly IBaseEntityRepository<ApplicationUser> _userRepository;
 
-    public OrderService(IBaseEntityRepository<Order> orderRepository, IBaseEntityRepository<OrderItem> orderItemRepository, IBaseEntityRepository<Item> itemRepository)
+    public OrderService(
+        IBaseEntityRepository<Order> orderRepository,
+        IBaseEntityRepository<OrderItem> orderItemRepository,
+        IBaseEntityRepository<Item> itemRepository,
+        IBaseEntityRepository<ApplicationUser> userRepository)
     {
         _orderRepository = orderRepository;
         _orderItemRepository = orderItemRepository;
         _itemRepository = itemRepository;
+        _userRepository = userRepository;
+
     }
 
-    public async Task<ServiceResponse<IEnumerable<OrderDetails>>> GetOrdersForUser(string userId)
+    public async Task<ServiceResponse<IEnumerable<OrderDetails>>> GetOrdersForUser(string email)
     {
         ServiceResponse<IEnumerable<OrderDetails>> response = new();
         List<OrderDetails> result = new();
         
         var dbOrderDetails = await (from order in _orderRepository.GetAll()
-                                join orderItem in _orderItemRepository.GetAll() on order.Id equals orderItem.OrderId
-                                join item in _itemRepository.GetAll() on orderItem.ItemId equals item.ID
-                                select new
-                                {
-                                    order.Id,
-                                    order.OrderDate,
-                                    order.TotalPrice,
-                                    item.Name,
-                                    orderItem.Quantity
-                                }).ToListAsync();
+                                    join orderItem in _orderItemRepository.GetAll() on order.Id equals orderItem.OrderId
+                                    join item in _itemRepository.GetAll() on orderItem.ItemId equals item.ID
+                                    join user in _userRepository.GetAll() on order.UserId equals user.Id
+                                    where user.Email == email
+                                    select new
+                                    {
+                                        order.Id,
+                                        order.OrderDate,
+                                        order.TotalPrice,
+                                        item.Name,
+                                        orderItem.Quantity
+                                    }).ToListAsync();
 
         var groupedOrderDetails = dbOrderDetails.GroupBy(x => new { x.Id, x.OrderDate, x.TotalPrice });
 
