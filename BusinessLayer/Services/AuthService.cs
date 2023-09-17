@@ -15,6 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using Repositories.Interface;
+using Microsoft.Extensions.Logging;
 
 namespace BusinessLayer.Services;
 
@@ -25,19 +26,22 @@ public class AuthService : IAuthService
     private readonly IBaseEntityRepository<ApplicationUser> _userRepository;
     private readonly IBaseEntityRepository<RefreshToken> _refreshTokenRepository;
     private readonly JWTModel _jwtModel;
+    private readonly ILogger<AuthService> _logger;
 
     public AuthService(
         UserManager<ApplicationUser> userManager, 
         RoleManager<IdentityRole> roleManager,
         JWTModel jwtModel, 
         IBaseEntityRepository<ApplicationUser> userRepository,
-        IBaseEntityRepository<RefreshToken> refreshTokenRepository)
+        IBaseEntityRepository<RefreshToken> refreshTokenRepository,
+        ILogger<AuthService> logger)
     {
         _userManager = userManager;
         _roleManager = roleManager;
         _jwtModel = jwtModel;
         _userRepository = userRepository;
         _refreshTokenRepository = refreshTokenRepository;
+        _logger = logger;
     }
 
     public async Task<ServiceResponse> RegisterUser(RegisterModel registerModel)
@@ -54,10 +58,16 @@ public class AuthService : IAuthService
 
         if (result.Succeeded)
         {
+            _logger.LogInformation("User created with {Email}", registerModel.Email);
+            
             if (!await _roleManager.RoleExistsAsync(registerModel.Role))
-                await _roleManager.CreateAsync(new (registerModel.Role));
+            {
+                await _roleManager.CreateAsync(new(registerModel.Role));
+                _logger.LogInformation("{Role} created when creating user with {Email}", registerModel.Role, registerModel.Email);
+            }
 
             await _userManager.AddToRoleAsync(user, registerModel.Role);
+            _logger.LogInformation("Added User {Email} to {Role}", registerModel.Email, registerModel.Role);
 
             List<Claim> claimList = new()
             {
@@ -74,6 +84,7 @@ public class AuthService : IAuthService
             response.StatusCode = HttpStatusCode.BadRequest;
             response.ErrorMessage = "User cannot be created";
             response.Errors = result.Errors.Select(x => x.Description).ToList();
+            _logger.LogError("Error while creating user -> {Errors}", result.Errors);
         }
 
         return response;

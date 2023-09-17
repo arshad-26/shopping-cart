@@ -1,5 +1,9 @@
 using DTO.Identity;
+using Serilog;
+using Serilog.Exceptions;
+using Serilog.Sinks.Elasticsearch;
 using ShoppingCartAPI.Startup;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +17,9 @@ builder.Services.RegisterDbContext();
 builder.Services.RegisterIdentity();
 builder.Services.RegisterAuthentication();
 builder.Services.RegisterCors();
+
+ServicesSetup.ConfigureLogging();
+builder.Host.UseSerilog();
 
 var app = builder.Build();
 

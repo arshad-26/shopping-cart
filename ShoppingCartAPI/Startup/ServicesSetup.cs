@@ -9,7 +9,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Repositories.Interface;
 using Repositories.Repository;
+using Serilog;
+using Serilog.Exceptions;
+using Serilog.Sinks.Elasticsearch;
 using ShoppingCartAPI.Models;
+using System.Reflection;
 using System.Text;
 
 namespace ShoppingCartAPI.Startup;
@@ -109,5 +113,32 @@ public static class ServicesSetup
         });
 
         return services;
+    }
+
+    public static void ConfigureLogging()
+    {
+        string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!;
+        var configuration = new ConfigurationBuilder()
+                            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                            .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json",optional: true)
+                            .Build();
+        Log.Logger = new LoggerConfiguration()
+                     .Enrich.FromLogContext()
+                     .Enrich.WithExceptionDetails()
+                     .WriteTo.Elasticsearch(ConfigureElasticSink(configuration, environment))
+                     .Enrich.WithProperty("Environment", environment)
+                     .ReadFrom.Configuration(configuration)
+                     .CreateLogger();
+    }
+
+    private static ElasticsearchSinkOptions ConfigureElasticSink(IConfigurationRoot configuration, string environment)
+    {
+        return new ElasticsearchSinkOptions(new Uri(configuration["ElasticConfiguration:Uri"]!))
+        {
+            AutoRegisterTemplate = true,
+            IndexFormat = $"{Assembly.GetExecutingAssembly().GetName().Name!.ToLower().Replace(".", "-")}-{environment?.ToLower().Replace(".", "-")}-{DateTime.UtcNow:yyyy-MM}",
+            NumberOfReplicas = 1,
+            NumberOfShards = 2
+        };
     }
 }
