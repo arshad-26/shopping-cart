@@ -52,6 +52,9 @@ public static class ServicesSetup
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped(typeof(IBaseEntityRepository<>), typeof(BaseEntityRepository<>));
 
+        // Transient Services
+        services.AddTransient<ExceptionMiddleware>();
+
         return services;        
     }
 

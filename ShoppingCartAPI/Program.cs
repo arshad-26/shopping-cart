@@ -1,9 +1,6 @@
 using DTO.Identity;
 using Serilog;
-using Serilog.Exceptions;
-using Serilog.Sinks.Elasticsearch;
 using ShoppingCartAPI.Startup;
-using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,10 +27,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.ConfigureExceptionHandler();
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<ExceptionMiddleware>();
 app.MapControllers();
 
 app.Run();
