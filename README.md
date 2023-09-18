@@ -7,6 +7,7 @@ This is a simple shopping cart website created with functionalities like adding 
 * Data Access - SQL Server with EF Core
 * Authentication/Authorization - ASP.Net Core Identity with JWT Authentication model
 * UI Addons - MudBlazor which is a UI Component Library for Blazor
+* Elasticsearch and Kibana - Used along with Serilog for logging. Able to be configured as docker containers and attached the yaml file as well.
 
 ### Steps to integrate
 * In the **appsettings.{environment}.json** file in the **ShoppingCartAPI** project, Change the connection string to point to a database of your choice.
