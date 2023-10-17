@@ -46,7 +46,9 @@ public class OrderService : IOrderService
                                         order.Id,
                                         order.OrderDate,
                                         order.TotalPrice,
+                                        item.ID,
                                         item.Name,
+                                        item.Price,
                                         orderItem.Quantity
                                     }).ToListAsync();
 
@@ -66,8 +68,10 @@ public class OrderService : IOrderService
             {
                 OrderItemDetails userOrderItemDetails = new()
                 {
+                    ID = orderItemDetail.ID,
                     Name = orderItemDetail.Name,
-                    Quantity = orderItemDetail.Quantity
+                    Quantity = orderItemDetail.Quantity,
+                    Price = orderItemDetail.Price
                 };
 
                 orderItems.Add(userOrderItemDetails);

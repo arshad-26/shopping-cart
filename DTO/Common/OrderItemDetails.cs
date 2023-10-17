@@ -8,7 +8,11 @@ namespace DTO.Common;
 
 public class OrderItemDetails
 {
+    public long ID { get; set; }
+    
     public string Name { get; set; } = String.Empty;
 
     public int Quantity { get; set; }
+
+    public decimal Price { get; set; }
 }

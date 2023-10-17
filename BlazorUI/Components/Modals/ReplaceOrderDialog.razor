@@ -1,0 +1,37 @@
+﻿@inject ISessionStorageService _sessionStorage
+@inject NavigationManager _navManager
+@inject ComponentBus _bus
+
+<MudDialog>
+    <DialogContent>
+        <MudText>@ContentText</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="async() => await ConfirmAsync()">Replace</MudButton>
+        <MudButton Color="Color.Error" Variant="Variant.Filled" OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter]
+    public string ContentText { get; set; } = String.Empty;
+
+    [Parameter]
+    public List<CartModel> CartItems { get; set; }
+
+    [CascadingParameter]
+    public MudDialogInstance MudDialog { get; set; } = new();
+
+    private async Task ConfirmAsync()
+    {
+        string jsonString = JsonSerializer.Serialize<List<CartModel>>(CartItems);
+        await _sessionStorage.SetItemAsync("Cart", jsonString);
+
+        CartCountUpdateEvent cartCountUpdateEvent = new() { CartCount = CartItems.Count };
+        await _bus.Publish(cartCountUpdateEvent);
+
+        _navManager.NavigateTo("/orders");
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

@@ -3,6 +3,10 @@
 @inject AuthInterceptor _authInterceptor
 @inject IHttpClientFactory _clientFactory
 @inject IJSRuntime _jsRuntime
+@inject ISessionStorageService _sessionStorage
+@inject NavigationManager _navManager
+@inject ComponentBus _bus
+@inject IDialogService _dialog
 @implements IDisposable
 
 <section class="order-container">
@@ -42,7 +46,7 @@
                     <MudElement HtmlTag="hr" Class="line-seperator"></MudElement>
                 </MudCardContent>
                 <MudCardActions>
-                    <MudButton Variant="Variant.Outlined">REORDER</MudButton>
+                    <MudButton Variant="Variant.Outlined" OnClick="async () => await Reorder(orderDetail.OrderID)">REORDER</MudButton>
                     <MudButton Variant="Variant.Outlined" Color="Color.Secondary">RATE ORDER</MudButton>
                 </MudCardActions>
             </MudCard>
@@ -54,7 +58,7 @@
 @code {
     #nullable disable
     private List<OrderDetails> userOrderDetails;
-    
+
     private TimeZoneInfo localTimezoneInfo;
 
     [CascadingParameter]
@@ -74,6 +78,48 @@
 
         string localTimezone = await _jsRuntime.InvokeAsync<string>("GetUserTimeZone");
         localTimezoneInfo = TimeZoneInfo.FindSystemTimeZoneById(localTimezone);
+    }
+
+    private async Task Reorder(long orderId)
+    {
+        string cartJson = await _sessionStorage.GetItemAsync<string>("Cart");
+
+        List<CartModel> orderItems = new();
+        OrderDetails orderDetail = userOrderDetails.FirstOrDefault(x => x.OrderID == orderId)!;
+        List<OrderItemDetails> orderItemDetails = orderDetail.Items.ToList();
+
+        foreach (OrderItemDetails orderItem in orderItemDetails)
+        {
+            CartModel cartItem = new()
+                {
+                    ItemID = orderItem.ID,
+                    ItemName = orderItem.Name,
+                    Quantity = orderItem.Quantity,
+                    Price = orderItem.Price
+                };
+
+            orderItems.Add(cartItem);
+        }
+
+        if (String.IsNullOrEmpty(cartJson))
+        {
+            string jsonString = JsonSerializer.Serialize<List<CartModel>>(orderItems);
+            await _sessionStorage.SetItemAsync("Cart", jsonString);
+
+            CartCountUpdateEvent cartCountUpdateEvent = new() { CartCount = orderItems.Count };
+            await _bus.Publish(cartCountUpdateEvent);
+
+            _navManager.NavigateTo("/orders");
+        }
+        else
+        {
+            DialogParameters parameters = new();
+            parameters.Add("ContentText", "Cart already contains items. Do you want to replace it?");
+            parameters.Add("CartItems", orderItems);
+
+            DialogOptions options = new() { MaxWidth = MaxWidth.ExtraSmall, Position = DialogPosition.Center };
+            _dialog.Show<ReplaceOrderDialog>("Replace Order", parameters, options);
+        }
     }
 
     public void Dispose()
