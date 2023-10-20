@@ -16,6 +16,8 @@ public class Order
 
     public decimal TotalPrice { get; set; }
 
+    public Int16? Rating { get; set; }
+
     public ApplicationUser User { get; set; } = new();
 
     public ICollection<OrderItem>? OrderItems { get; set;}
