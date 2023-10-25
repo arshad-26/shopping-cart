@@ -1,5 +1,5 @@
 ﻿@page "/orderhistory"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "User")]
 @inject AuthInterceptor _authInterceptor
 @inject IHttpClientFactory _clientFactory
 @inject IJSRuntime _jsRuntime
@@ -47,7 +47,7 @@
                 </MudCardContent>
                 <MudCardActions>
                     <MudButton Variant="Variant.Outlined" OnClick="async () => await Reorder(orderDetail.OrderID)">REORDER</MudButton>
-                    <MudButton Variant="Variant.Outlined" Color="Color.Secondary">RATE ORDER</MudButton>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="() => NavRating(orderDetail.OrderID)">RATE ORDER</MudButton>
                 </MudCardActions>
             </MudCard>
         }
@@ -120,6 +120,11 @@
             DialogOptions options = new() { MaxWidth = MaxWidth.ExtraSmall, Position = DialogPosition.Center };
             _dialog.Show<ReplaceOrderDialog>("Replace Order", parameters, options);
         }
+    }
+
+    private void NavRating(long OrderId)
+    {
+        _navManager.NavigateTo($"/rating/{OrderId}");
     }
 
     public void Dispose()

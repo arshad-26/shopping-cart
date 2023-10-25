@@ -1,0 +1,13 @@
+﻿.main-container {
+    display: flex;
+    flex-direction: column;
+    justify-content:center;
+    align-items: center;
+    gap:1em;
+    margin-top: 5em;
+}
+
+.button-section{
+    display: flex;
+    gap:0.8em;
+}

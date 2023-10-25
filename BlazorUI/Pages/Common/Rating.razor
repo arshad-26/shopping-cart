@@ -1,0 +1,19 @@
+﻿@page "/rating/{OrderId}"
+@attribute [Authorize(Roles = "User")]
+@inject NavigationManager _navManager
+
+<div class="main-container">
+    <MudElement HtmlTag="h1">Submit your rating</MudElement>
+    <MudRating Size="Size.Large" />
+    <div class="button-section">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary">Submit</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="() => BackNav()">Back</MudButton>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string OrderId { get; set; } = String.Empty;
+
+    private void BackNav() => _navManager.NavigateTo("/orderhistory");
+}
