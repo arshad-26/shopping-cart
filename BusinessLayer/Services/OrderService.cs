@@ -84,4 +84,15 @@ public class OrderService : IOrderService
         response.ResponseData = result;
         return response;
     }
+
+    public async Task<ServiceResponse> SubmitRating(OrderRating orderRating)
+    {
+        ServiceResponse response = new ();
+
+        Order order = (await _orderRepository.FirstOrDefaultAsync(x => x.Id == orderRating.OrderID))!;
+        order.Rating = orderRating.Rating;
+        await _orderRepository.UpdateAsync(order);
+
+        return response;
+    }
 }

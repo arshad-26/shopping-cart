@@ -24,4 +24,11 @@ public class OrderController : ControllerBase
         ServiceResponse<IEnumerable<OrderDetails>> response = await _orderService.GetOrdersForUser(email);
         return StatusCode((int)response.StatusCode, response);
     }
+
+    [HttpPost]
+    public async Task<IActionResult> SubmitRating(OrderRating orderRating)
+    {
+        ServiceResponse response = await _orderService.SubmitRating(orderRating);
+        return StatusCode((int)response.StatusCode, response);
+    }
 }

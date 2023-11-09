@@ -1,19 +1,49 @@
 ﻿@page "/rating/{OrderId}"
 @attribute [Authorize(Roles = "User")]
+@inject AuthInterceptor _authInterceptor
 @inject NavigationManager _navManager
+@inject IHttpClientFactory _clientFactory
+@inject ISnackbar _snackBar
+@implements IDisposable
 
 <div class="main-container">
     <MudElement HtmlTag="h1">Submit your rating</MudElement>
-    <MudRating Size="Size.Large" />
+    <MudRating @bind-SelectedValue="SelectedRating" Size="Size.Large" />
     <div class="button-section">
-        <MudButton Variant="Variant.Filled" Color="Color.Primary">Submit</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="async () => await SubmitRating()">Submit</MudButton>
         <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="() => BackNav()">Back</MudButton>
     </div>
 </div>
 
 @code {
+    private int SelectedRating = 1;
+
     [Parameter]
     public string OrderId { get; set; } = String.Empty;
 
+    protected override void OnInitialized() => _authInterceptor.RegisterEvent();
+
+    private async Task SubmitRating()
+    {
+        HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
+
+        OrderRating ratingDetails = new() { OrderID = Convert.ToInt32(OrderId), Rating = (short)SelectedRating };
+
+        HttpResponseMessage response = await httpClient.PostAsJsonAsync<OrderRating>("Order/SubmitRating", ratingDetails);
+
+        if (response.IsSuccessStatusCode)
+        {
+            _navManager.NavigateTo("/orderhistory");
+            _snackBar.Add("Rating has been submitted successfully", Severity.Success);
+        }
+        else
+        {
+            _snackBar.Add("An unexpected error occured", Severity.Error);
+        }
+    }
+
     private void BackNav() => _navManager.NavigateTo("/orderhistory");
+
+    public void Dispose() => _authInterceptor.DisposeEvent();
+    
 }

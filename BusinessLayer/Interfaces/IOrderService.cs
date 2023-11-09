@@ -10,4 +10,6 @@ namespace BusinessLayer.Interfaces;
 public interface IOrderService
 {
     Task<ServiceResponse<IEnumerable<OrderDetails>>> GetOrdersForUser(string email);
+
+    Task<ServiceResponse> SubmitRating(OrderRating orderRating);
 }
