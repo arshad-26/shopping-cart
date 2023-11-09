@@ -1,5 +1,5 @@
 # ShoppingCart
-This is a simple shopping cart website created with functionalities like adding categories and items, adding items to a cart and placing orders with User and Admin logins. Users can register themselves to this application.
+This is a simple shopping cart website created with functionalities like adding categories and items, adding items to a cart and placing orders with User and Admin logins and rating orders. Users can register themselves to this application.
 
 ## Technologies Used
 * Backend - ASP.NET Core Web API
