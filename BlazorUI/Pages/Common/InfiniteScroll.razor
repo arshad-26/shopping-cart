@@ -1,0 +1,36 @@
+﻿@page "/scroll"
+@layout IdentityLayout
+@attribute [AllowAnonymous]
+@inject IHttpClientFactory _clientFactory
+
+<div style="height:500px;width:200px;overflow:auto;border:1px solid black">
+    <Virtualize Context="item" ItemsProvider="@LoadItems">
+        <ItemContent>
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.Name</td>
+                <td>@item.Value</td>
+            </tr>
+        </ItemContent>
+        <Placeholder>
+            <p>Loading so many Items...</p>
+        </Placeholder>
+    </Virtualize>
+</div>
+
+@code {
+    public int TotalSize { get; set; }
+
+    private async ValueTask<ItemsProviderResult<TestItem>> LoadItems(ItemsProviderRequest request)
+    {
+        int itemNum = Math.Min(request.Count, TotalSize - request.StartIndex);
+        int pageSize = itemNum == 0 ? request.Count : itemNum;
+
+        HttpClient httpClient = _clientFactory.CreateClient("ServerAPI");
+        ItemResponse response = (await httpClient.GetFromJsonAsync<ItemResponse>($"TestData/GetTestData?startIndex={request.StartIndex}&pageSize={pageSize}"))!;
+
+        TotalSize = response.TotalCount;
+
+        return new ItemsProviderResult<TestItem>(response.Items, response.TotalCount);
+    }
+}
